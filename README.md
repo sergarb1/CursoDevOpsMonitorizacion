@@ -22,7 +22,7 @@
 > **Actualizado:** 01/06/2026 · Repositorio del curso *DevOps y Monitorización*
 
 <p align="center">
-  👉 <a href="https://sergarb1.github.io/CursoDevOpsMonitorizacion/"><strong><big>🌐 GitHub Pages — Ver curso online</big></strong></a> 👈
+  👉 <a href="https://sergarb1.github.io/CursoDevOpsMonitorizacion/"><strong><big>🌐 Curso DevOps y Monitorización — Ver curso online</big></strong></a> 👈
 </p>
 
 Repositorio del curso *DevOps y Monitorización*, diseñado para aprender automatización de sistemas, despliegues, monitorización e integración continua desde un enfoque práctico y progresivo.  
