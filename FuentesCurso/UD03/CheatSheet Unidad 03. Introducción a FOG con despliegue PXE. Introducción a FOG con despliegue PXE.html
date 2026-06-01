@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>CheatSheet · FOG & PXE · DevOps</title>
+
+    <!-- Fonts & Icons -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+    <!-- Libraries -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        fog: {
+                            50: '#f0f4ff',
+                            100: '#e0e9fe',
+                            200: '#c1d3fe',
+                            300: '#91b1fd',
+                            400: '#5a87fa',
+                            500: '#355df5',
+                            600: '#233ee9',
+                            700: '#1c2fd5',
+                            800: '#1d29ad',
+                            900: '#1d2889',
+                            950: '#161a53',
+                        },
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style type="text/tailwindcss">
+        @layer base {
+            body {
+                @apply bg-slate-50 text-slate-900 antialiased selection:bg-fog-100 selection:text-fog-900;
+            }
+        }
+
+        @layer components {
+            .section-card {
+                @apply bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-all duration-300;
+            }
+            .code-inline {
+                @apply font-mono text-sm bg-slate-100 text-fog-700 px-1.5 py-0.5 rounded-md border border-slate-200;
+            }
+            .btn-badge {
+                @apply px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider inline-flex items-center;
+            }
+            .gradient-bg {
+                background: radial-gradient(circle at top right, rgba(53, 93, 245, 0.05), transparent),
+                            radial-gradient(circle at bottom left, rgba(53, 93, 245, 0.05), transparent);
+            }
+            .step-number {
+                @apply w-8 h-8 rounded-full bg-fog-500 text-white flex items-center justify-center font-bold text-sm shadow-lg shadow-fog-200 flex-shrink-0;
+            }
+        }
+
+        pre {
+            @apply font-mono text-sm bg-slate-900 text-slate-100 p-4 rounded-xl overflow-x-auto border border-slate-800 my-4 shadow-inner;
+        }
+
+        @media print {
+            @page { margin: 1cm; }
+            .no-print { display: none !important; }
+            
+            body { 
+                background: white !important; 
+                min-height: 0 !important; 
+                padding: 0 !important; 
+                margin: 0 !important;
+                color: black !important;
+            }
+            
+            #app { 
+                max-width: none !important; 
+                padding: 0 !important; 
+                margin: 0 !important;
+                display: block !important; 
+            }
+
+            header { 
+                @apply border-b border-slate-200 mb-4 pb-4 !important;
+                display: flex !important;
+                flex-direction: row !important;
+                justify-content: space-between !important;
+                align-items: flex-end !important;
+                break-inside: avoid !important;
+            }
+
+            .lg\:grid-cols-3 { 
+                display: block !important; 
+            }
+
+            .lg\:col-span-2 { 
+                width: 100% !important; 
+            }
+
+            .section-card { 
+                @apply mb-4 p-4 border border-slate-200 rounded-lg !important;
+                break-inside: avoid !important;
+                page-break-inside: avoid !important;
+                box-shadow: none !important;
+            }
+
+            .md\:grid-cols-2 {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+            }
+
+            h1 { font-size: 24pt !important; }
+            h2 { font-size: 16pt !important; }
+            p, td, li { font-size: 10pt !important; }
+            pre { 
+                font-size: 8pt !important; 
+                white-space: pre-wrap !important;
+                @apply p-2 my-2 bg-slate-50 text-slate-900 border border-slate-200 !important;
+            }
+            
+            .gradient-bg { background: none !important; }
+            .bg-fog-950 { background: white !important; color: black !important; border: 1px solid #ccc !important; }
+            .text-white { color: black !important; }
+        }
+    </style>
+</head>
+
+<body class="gradient-bg min-h-screen pb-12">
+<div id="app" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+
+    <!-- Header -->
+    <header class="mb-10 flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-8">
+        <div>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-fog-100 text-fog-700 text-xs font-bold mb-4 uppercase tracking-widest">
+                <i class="bi bi-diagram-3-fill"></i> Clonación y Despliegue
+            </div>
+            <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 flex items-center gap-3">
+                <span class="bg-fog-500 text-white p-2 rounded-xl shadow-lg shadow-fog-200">
+                    <i class="bi bi-hdd-network-fill text-2xl"></i>
+                </span>
+                FOG & PXE CheatSheet
+            </h1>
+            <p class="mt-2 text-lg text-slate-500 font-medium">
+                DevOps · Automatización y monitorización de infraestructuras
+            </p>
+        </div>
+        <div class="text-right">
+            <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">Unidad 03</p>
+            <p class="text-sm font-semibold text-slate-600">Despliegue automatizado con FOG sobre PXE</p>
+            <div class="mt-3 flex gap-2 justify-end">
+                <span class="bg-slate-100 text-slate-700 text-xs px-2 py-1 rounded-full font-mono">🌐 172.28.0.30</span>
+                <span class="bg-fog-100 text-fog-700 text-xs px-2 py-1 rounded-full font-mono">👤 fog/password</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Dashboard Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        <!-- Left Column: Commands & Logic -->
+        <div class="lg:col-span-2 space-y-6">
+            
+            <!-- Essential Lab Scripts -->
+            <section class="section-card">
+                <h2 class="text-xl font-bold flex items-center gap-2 mb-6 border-b border-slate-100 pb-4">
+                    <i class="bi bi-terminal-fill text-fog-500"></i>
+                    1. Operaciones del Laboratorio
+                </h2>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left">
+                        <thead class="text-xs text-slate-500 uppercase font-bold bg-slate-50 rounded-lg">
+                            <tr>
+                                <th class="px-4 py-3 rounded-l-lg">Script</th>
+                                <th class="px-4 py-3">Función Principal</th>
+                                <th class="px-4 py-3 rounded-r-lg">Riesgo</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-100">
+                            <tr v-for="cmd in commands" :key="cmd.name" class="hover:bg-slate-50 transition-colors">
+                                <td class="px-4 py-3 font-mono font-medium text-fog-700 text-xs">{{ cmd.name }}</td>
+                                <td class="px-4 py-3 text-slate-600 text-xs">{{ cmd.use }}</td>
+                                <td class="px-4 py-3">
+                                    <span :class="riskClass(cmd.risk)" class="btn-badge">
+                                        <i :class="riskIcon(cmd.risk)" class="mr-1"></i>
+                                        {{ cmd.risk }}
+                                    </span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                <div class="mt-6 p-4 bg-amber-50 rounded-xl border border-amber-200 flex gap-3 items-start">
+                    <i class="bi bi-exclamation-triangle-fill text-amber-500 mt-1"></i>
+                    <div>
+                        <p class="text-sm font-bold text-amber-800 mb-1">⚠️ Aviso Sysprep</p>
+                        <p class="text-xs text-amber-700">Nunca captures una imagen sin ejecutar el script de limpieza previo. Elimina SSH keys, machine-id e historiales para evitar IPs duplicadas tras la clonación.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 🔥 NUEVA SECCIÓN: Cómo funciona Captura y Despliegue -->
+            <section class="section-card border-fog-200 bg-gradient-to-br from-white to-fog-50/30">
+                <h2 class="text-xl font-bold flex items-center gap-2 mb-6 border-b border-slate-100 pb-4">
+                    <i class="bi bi-camera-video-fill text-fog-500"></i>
+                    2. ¿Cómo funciona la Captura y el Despliegue en FOG?
+                </h2>
+                
+                <!-- Explicación General -->
+                <div class="mb-6 p-4 bg-fog-950 text-white rounded-xl">
+                    <p class="text-sm leading-relaxed">
+                        <strong>FOG no copia archivos</strong>, sino que clona <strong>bloques de disco</strong> (ceros y unos) usando 
+                        <span class="text-fog-300 font-bold">Partclone</span>. Durante la captura o despliegue, el equipo cliente 
+                        <strong>nunca arranca su sistema operativo</strong>. En su lugar, el servidor FOG le inyecta en la RAM un 
+                        micro-Linux llamado <span class="text-fog-300 font-bold">FOS (FOG Operating System)</span> 
+                        que ejecuta la clonación y se reinicia sin dejar rastro.
+                    </p>
+                </div>
+
+                <!-- Dos columnas: Captura vs Despliegue -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    
+                    <!-- CAPTURA -->
+                    <div class="bg-white rounded-xl border border-fog-200 p-5">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="step-number bg-emerald-500 shadow-emerald-200">
+                                <i class="bi bi-upload"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-emerald-700">Fase de CAPTURA</h3>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-4">
+                            <strong>Objetivo:</strong> Enviar el disco duro completo de la <em>Golden-VM</em> al servidor FOG para crear una imagen maestra.
+                        </p>
+                        
+                        <div class="space-y-3">
+                            <div class="flex gap-3 p-3 bg-slate-50 rounded-lg">
+                                <span class="font-bold text-fog-600 text-sm flex-shrink-0">Paso 1</span>
+                                <div>
+                                    <p class="text-xs font-bold text-slate-700">Registro de la Golden-VM</p>
+                                    <p class="text-xs text-slate-500">Registras la dirección MAC de la Golden-VM en el panel web de FOG (Host Management → Create New Host).</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3 p-3 bg-slate-50 rounded-lg">
+                                <span class="font-bold text-fog-600 text-sm flex-shrink-0">Paso 2</span>
+                                <div>
+                                    <p class="text-xs font-bold text-slate-700">Asignar tarea de captura</p>
+                                    <p class="text-xs text-slate-500">En la web, seleccionas el host y haces clic en <strong>Capture</strong>. Esto programa una tarea pendiente.</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3 p-3 bg-slate-50 rounded-lg">
+                                <span class="font-bold text-fog-600 text-sm flex-shrink-0">Paso 3</span>
+                                <div>
+                                    <p class="text-xs font-bold text-slate-700">Arranque PXE de la Golden</p>
+                                    <p class="text-xs text-slate-500">Enciendes la Golden-VM. Su BIOS arranca por red (PXE). El servidor DHCP le asigna IP y le entrega el archivo de arranque.</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3 p-3 bg-slate-50 rounded-lg">
+                                <span class="font-bold text-fog-600 text-sm flex-shrink-0">Paso 4</span>
+                                <div>
+                                    <p class="text-xs font-bold text-slate-700">Carga de FOS en RAM</p>
+                                    <p class="text-xs text-slate-500">El cliente descarga por TFTP/HTTP el micro-Linux FOS, que se carga completamente en memoria RAM.</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3 p-3 bg-fog-50 rounded-lg border border-fog-100">
+                                <span class="font-bold text-fog-600 text-sm flex-shrink-0">Paso 5</span>
+                                <div>
+                                    <p class="text-xs font-bold text-fog-700">Subida del disco por NFS</p>
+                                    <p class="text-xs text-slate-500">FOS ejecuta <strong>Partclone</strong>, lee los bloques del disco duro local y los transmite por NFS al servidor FOG, que los guarda en <code class="code-inline text-[10px]">/images/</code>. Verás la <strong>pantalla azul</strong> de progreso.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DESPLIEGUE -->
+                    <div class="bg-white rounded-xl border border-fog-200 p-5">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="step-number bg-blue-500 shadow-blue-200">
+                                <i class="bi bi-download"></i>
+                            </div>
+                            <h3 class="text-lg font-bold text-blue-700">Fase de DESPLIEGUE</h3>
+                        </div>
+                        <p class="text-xs text-slate-500 mb-4">
+                            <strong>Objetivo:</strong> Volcar la imagen capturada en uno o varios equipos cliente vacíos (Target-VM).
+                        </p>
+                        
+                        <div class="space-y-3">
+                            <div class="flex gap-3 p-3 bg-slate-50 rounded-lg">
+                                <span class="font-bold text-fog-600 text-sm flex-shrink-0">Opción A</span>
+                                <div>
+                                    <p class="text-xs font-bold text-slate-700">Despliegue rápido (Quick Deploy)</p>
+                                    <p class="text-xs text-slate-500">Arrancas la Target-VM, seleccionas <strong>"Deploy Image"</strong> en el menú azul PXE, introduces credenciales FOG y eliges la imagen. El volcado comienza al instante.</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3 p-3 bg-slate-50 rounded-lg">
+                                <span class="font-bold text-fog-600 text-sm flex-shrink-0">Opción B</span>
+                                <div>
+                                    <p class="text-xs font-bold text-slate-700">Despliegue gestionado</p>
+                                    <p class="text-xs text-slate-500">La Target se registra mediante <strong>"Full Registration"</strong> en el menú PXE. Desde la web asignas una tarea de <strong>Download</strong> y al reiniciar se despliega automáticamente.</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3 p-3 bg-slate-50 rounded-lg">
+                                <span class="font-bold text-fog-600 text-sm flex-shrink-0">Paso X</span>
+                                <div>
+                                    <p class="text-xs font-bold text-slate-700">Carga de FOS en la Target</p>
+                                    <p class="text-xs text-slate-500">Igual que en la captura: la Target arranca por PXE, recibe FOS en RAM y se prepara para recibir datos.</p>
+                                </div>
+                            </div>
+                            <div class="flex gap-3 p-3 bg-fog-50 rounded-lg border border-fog-100">
+                                <span class="font-bold text-fog-600 text-sm flex-shrink-0">Paso Y</span>
+                                <div>
+                                    <p class="text-xs font-bold text-fog-700">Volcado del disco por NFS</p>
+                                    <p class="text-xs text-slate-500">FOS ejecuta <strong>Partclone</strong> en modo restauración. Lee los bloques de la imagen desde el servidor FOG por NFS y los escribe directamente en el disco local. Aparece la <strong>barra de progreso azul</strong>. Al terminar, la máquina se reinicia con el nuevo sistema.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Nota sobre Multicast -->
+                <div class="mt-6 p-4 bg-fog-50 rounded-xl border border-fog-200">
+                    <div class="flex items-start gap-3">
+                        <i class="bi bi-broadcast text-fog-500 text-xl mt-1"></i>
+                        <div>
+                            <p class="font-bold text-fog-800 text-sm">Despliegue Multicast (udpcast)</p>
+                            <p class="text-xs text-slate-600 mt-1">
+                                Si necesitas desplegar en <strong>30 equipos simultáneamente</strong>, FOG agrupa los clientes en una sesión Multicast. 
+                                La imagen se envía <strong>una sola vez</strong> a la red y todos los clientes "escuchan" al mismo tiempo. 
+                                Así, 30 equipos se clonan en el mismo tiempo que uno solo, sin colapsar el switch.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Networking & BIOS Settings -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <!-- Red Híbrida PXE -->
+                <section class="section-card">
+                    <h3 class="text-lg font-bold flex items-center gap-2 mb-4">
+                        <i class="bi bi-hdd-network text-fog-500"></i> Red Híbrida PXE
+                    </h3>
+                    <div class="space-y-3">
+                        <div class="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                            <div class="font-bold text-slate-700 text-sm flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-blue-500"></span> NIC1 (NAT)
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1">Salida a internet. Debe apagarse durante la captura PXE para evitar DHCP timeouts.</p>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                            <div class="font-bold text-slate-700 text-sm flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-green-500"></span> NIC2 (Bridge LabCEFIRE)
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1">Red aislada <code class="code-inline text-xs">172.28.0.x</code> donde residen los servicios FOG y ocurre la transferencia TFTP/NFS.</p>
+                        </div>
+                        <div class="p-3 bg-slate-50 rounded-lg border border-slate-100">
+                            <div class="font-bold text-slate-700 text-sm flex items-center gap-2">
+                                <span class="w-2 h-2 rounded-full bg-purple-500"></span> Modo Promiscuo
+                            </div>
+                            <p class="text-xs text-slate-500 mt-1">Obligatorio en VirtualBox (<code class="code-inline text-xs">allow-all</code>) para procesar tráfico Multicast/TFTP.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Ajustes BIOS Virtual -->
+                <section class="section-card">
+                    <h3 class="text-lg font-bold flex items-center gap-2 mb-4">
+                        <i class="bi bi-cpu-fill text-fog-500"></i> Ajustes BIOS Virtual
+                    </h3>
+                    <p class="text-sm text-slate-600 mb-4">Alteración de hardware con <code class="code-inline">VBoxManage</code></p>
+                    <div class="bg-slate-900 rounded-xl p-4 space-y-2 shadow-inner">
+                        <code class="text-xs text-emerald-400 block">--boot1 net --boot2 disk</code>
+                        <code class="text-xs text-amber-400 block">--nicbootprio1 2</code>
+                        <code class="text-xs text-rose-400 block">--nic1 none</code>
+                    </div>
+                    <ul class="mt-4 space-y-2 text-xs text-slate-500">
+                        <li class="flex items-center gap-2"><i class="bi bi-check2 text-emerald-500"></i> Fuerza la red como primer boot.</li>
+                        <li class="flex items-center gap-2"><i class="bi bi-check2 text-amber-500"></i> PXE a través del adaptador 2 (Bridge).</li>
+                        <li class="flex items-center gap-2"><i class="bi bi-check2 text-rose-500"></i> "Desconecta" la NIC1 antes de capturar.</li>
+                    </ul>
+                </section>
+            </div>
+
+            <!-- FOG Core Services -->
+            <section class="section-card">
+                <h2 class="text-xl font-bold flex items-center gap-2 mb-6 border-b border-slate-100 pb-4">
+                    <i class="bi bi-diagram-2-fill text-fog-500"></i>
+                    3. Servicios Core del FOG Server
+                </h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div v-for="box in boxes" :key="box.name" class="p-4 border border-slate-100 rounded-xl hover:border-fog-200 transition-all hover:bg-fog-50/30 bg-white">
+                        <div class="flex items-start gap-3">
+                            <div class="mt-1 text-fog-500 text-lg">
+                                <i :class="box.icon"></i>
+                            </div>
+                            <div>
+                                <div class="font-mono text-sm text-fog-700 font-bold mb-1">{{ box.name }}</div>
+                                <div class="text-xs text-slate-500 leading-relaxed">{{ box.desc }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Problemas Comunes -->
+            <section class="section-card">
+                <h2 class="text-xl font-bold flex items-center gap-2 mb-6 border-b border-slate-100 pb-4">
+                    <i class="bi bi-bug-fill text-rose-500"></i>
+                    4. Problemas Comunes y Soluciones
+                </h2>
+                <div class="space-y-4">
+                    <div class="p-4 bg-rose-50 rounded-xl border border-rose-100">
+                        <p class="font-bold text-rose-800 text-sm">🛑 Timeout en PXE: "No DHCP or proxyDHCP offers were received"</p>
+                        <p class="text-xs text-rose-600 mt-1"><strong>Solución:</strong> FOG no escucha en la interfaz correcta o Vagrant fuerza la salida por NAT. Ejecuta <code class="code-inline text-xs">fix-golden-network-order.sh</code> para desactivar NIC1.</p>
+                    </div>
+                    <div class="p-4 bg-rose-50 rounded-xl border border-rose-100">
+                        <p class="font-bold text-rose-800 text-sm">🛑 IPs Duplicadas Post-Clonación</p>
+                        <p class="text-xs text-rose-600 mt-1"><strong>Solución:</strong> Inicia sesión en el clon como <code class="code-inline text-xs">admin / AdminCEFIRE1234</code> y ejecuta <code class="code-inline text-xs">sudo /home/admin/Escritorio/scripts/01-configurar-red.sh</code>.</p>
+                    </div>
+                    <div class="p-4 bg-rose-50 rounded-xl border border-rose-100">
+                        <p class="font-bold text-rose-800 text-sm">🛑 Error "PXE-E32: TFTP open timeout"</p>
+                        <p class="text-xs text-rose-600 mt-1"><strong>Solución:</strong> Instalaste FOG en <code class="code-inline text-xs">eth0</code> (NAT) en lugar de <code class="code-inline text-xs">eth1</code> (Bridge). Corrige <code class="code-inline text-xs">/opt/fogproject/.fosettings</code> y reinstala.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Vagrantfile Example -->
+            <section class="section-card">
+                <div class="flex items-center justify-between mb-4">
+                    <h2 class="text-xl font-bold flex items-center gap-2">
+                        <i class="bi bi-file-code-fill text-fog-500"></i>
+                        5. Vagrantfile (Configuración PXE)
+                    </h2>
+                    <span class="text-xs font-bold text-slate-400 bg-slate-100 px-3 py-1 rounded-full uppercase">Ruby DSL</span>
+                </div>
+                <pre class="!m-0 text-xs leading-relaxed"><span class="text-slate-500 italic"># Permitir tráfico PXE en bridge (NIC2)</span>
+<span class="text-fog-400">vb.customize</span> [<span class="text-amber-400">"modifyvm"</span>, <span class="text-purple-400">:id</span>, <span class="text-amber-400">"--nicpromisc2"</span>, <span class="text-amber-400">"allow-all"</span>]
+<span class="text-fog-400">vb.customize</span> [<span class="text-amber-400">"modifyvm"</span>, <span class="text-purple-400">:id</span>, <span class="text-amber-400">"--cableconnected2"</span>, <span class="text-amber-400">"on"</span>]
+
+<span class="text-slate-500 italic"># ARRANQUE PXE (Red primero, Disco segundo)</span>
+<span class="text-fog-400">vb.customize</span> [<span class="text-amber-400">"modifyvm"</span>, <span class="text-purple-400">:id</span>, <span class="text-amber-400">"--boot1"</span>, <span class="text-amber-400">"net"</span>, <span class="text-amber-400">"--boot2"</span>, <span class="text-amber-400">"disk"</span>]
+
+<span class="text-slate-500 italic"># CLAVE → Forzar PXE por NIC2 (bridge)</span>
+<span class="text-fog-400">vb.customize</span> [<span class="text-amber-400">"modifyvm"</span>, <span class="text-purple-400">:id</span>, <span class="text-amber-400">"--nicbootprio1"</span>, <span class="text-amber-400">"2"</span>]</pre>
+            </section>
+        </div>
+
+        <!-- Right Column: Config & Flow -->
+        <div class="space-y-6">
+            
+            <!-- Credenciales -->
+            <section class="section-card bg-fog-950 text-white border-none shadow-xl shadow-fog-200">
+                <h2 class="text-xl font-bold flex items-center gap-2 mb-4 border-b border-white/10 pb-4">
+                    <i class="bi bi-key-fill text-fog-400"></i>
+                    Credenciales
+                </h2>
+                <div class="space-y-3">
+                    <div class="p-3 bg-white/5 rounded-lg">
+                        <p class="text-xs text-fog-300 uppercase tracking-wider">Panel Web FOG</p>
+                        <code class="text-sm text-white block mt-1">http://172.28.0.30/fog/management</code>
+                        <p class="text-xs text-fog-300 mt-1">Usuario: <strong>fog</strong> · Contraseña: <strong>password</strong></p>
+                    </div>
+                    <div class="p-3 bg-white/5 rounded-lg">
+                        <p class="text-xs text-fog-300 uppercase tracking-wider">VMs (Golden & Target)</p>
+                        <p class="text-xs text-fog-300 mt-1">Usuario: <strong>admin</strong> · Contraseña: <strong>AdminCEFIRE1234</strong></p>
+                    </div>
+                    <div class="p-3 bg-white/5 rounded-lg">
+                        <p class="text-xs text-fog-300 uppercase tracking-wider">Servidor FOG (SSH)</p>
+                        <code class="text-sm text-white block mt-1">vagrant ssh FOG-Server</code>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Ciclo de Vida FOG -->
+            <section class="section-card">
+                <h2 class="text-lg font-bold flex items-center gap-2 mb-4">
+                    <i class="bi bi-arrow-repeat text-fog-500"></i>
+                    Ciclo de Vida Completo
+                </h2>
+                <div class="relative pl-8 space-y-5 before:absolute before:left-[15px] before:top-2 before:bottom-2 before:w-0.5 before:bg-fog-100">
+                    <div v-for="(step, i) in flow" :key="i" class="relative">
+                        <span class="absolute -left-[28px] top-0 w-5 h-5 rounded-full bg-fog-500 border-2 border-white text-[9px] flex items-center justify-center font-bold text-white">
+                            {{ i + 1 }}
+                        </span>
+                        <div class="font-bold text-sm text-slate-800">{{ step.title }}</div>
+                        <code class="text-[10px] text-slate-500">{{ step.cmd }}</code>
+                    </div>
+                </div>
+            </section>
+
+            <!-- FOG Advanced Concepts -->
+            <section class="section-card bg-slate-50 border-slate-200">
+                <h2 class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2">
+                    <i class="bi bi-journal-code"></i> Conceptos Clave
+                </h2>
+                <div class="space-y-3">
+                    <div v-for="flag in flags" :key="flag.name" class="p-3 bg-white rounded-lg border border-slate-200 hover:border-fog-200 transition-all">
+                        <code class="text-xs font-bold text-fog-700">{{ flag.name }}</code>
+                        <p class="text-xs text-slate-600 mt-1 leading-relaxed">{{ flag.desc }}</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Instalación Manual -->
+            <section class="section-card border-amber-200 bg-amber-50/50">
+                <h2 class="text-lg font-bold flex items-center gap-2 mb-4">
+                    <i class="bi bi-exclamation-diamond-fill text-amber-500"></i>
+                    ⚡ Pasos Manuales Críticos
+                </h2>
+                <div class="space-y-3 text-sm">
+                    <div class="p-3 bg-white rounded-lg border border-amber-100">
+                        <p class="font-bold text-amber-800 text-sm">1. Instalador FOG</p>
+                        <code class="text-xs text-amber-700 block mt-1">sudo /opt/fogproject/bin/installfog.sh</code>
+                        <ul class="text-xs text-amber-600 mt-2 space-y-1 list-disc list-inside">
+                            <li><strong>Interface:</strong> eth1 (¡NO eth0!)</li>
+                            <li><strong>DHCP Server:</strong> Y → IP: 172.28.0.30</li>
+                            <li><strong>DNS:</strong> 8.8.8.8</li>
+                            <li><strong>HTTPS:</strong> N</li>
+                        </ul>
+                    </div>
+                    <div class="p-3 bg-white rounded-lg border border-amber-100">
+                        <p class="font-bold text-amber-800 text-sm">2. Base de Datos</p>
+                        <p class="text-xs text-amber-600 mt-1">Ir a <code class="code-inline text-xs">http://172.28.0.30/fog/management</code> y hacer clic en <strong>"Install/Update Database"</strong>. Solo después de esto, volver a la terminal y pulsar Enter.</p>
+                    </div>
+                    <div class="p-3 bg-white rounded-lg border border-amber-100">
+                        <p class="font-bold text-amber-800 text-sm">3. MAC de la Golden-VM</p>
+                        <p class="text-xs text-amber-600 mt-1">El script <code class="code-inline text-xs">02-deploy-golden.sh</code> muestra la MAC en verde. <strong>Apúntala</strong>. La necesitas para registrar el host en FOG.</p>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="mt-12 pt-8 border-t border-slate-200 text-center">
+        <p class="text-sm font-bold text-slate-800 uppercase tracking-tighter">
+            DevOps · Automatización y monitorización de infraestructuras
+        </p>
+        <p class="text-xs text-slate-400 mt-1">
+            &copy; 2026 · CheatSheet Unidad 03 · Introducción a FOG con despliegue PXE
+        </p>
+        <div class="mt-4 flex justify-center items-center gap-2">
+            <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank" class="flex items-center gap-1 text-[10px] text-slate-500 font-bold uppercase tracking-tighter hover:text-fog-500 transition-colors">
+                <img alt="Licencia Creative Commons" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png" />
+                <span>CC BY-SA 4.0</span>
+            </a>
+        </div>
+    </footer>
+
+</div>
+
+<script>
+const { createApp } = Vue
+
+createApp({
+    data(){
+        return {
+            commands: [
+                {name: "01-setup-network.sh", use: "Crea el bridge LabCEFIRE y la interfaz dummy en el Kernel del Host.", risk: "Medio"},
+                {name: "02-deploy-golden.sh", use: "Arranca la VM maestra y extrae su MAC Address por terminal.", risk: "Nulo"},
+                {name: "03-deploy-fog.sh", use: "Levanta el servidor Debian con pre-requisitos LAMP/NFS.", risk: "Nulo"},
+                {name: "installfog.sh", use: "Instalador interactivo de FOG. (¡CRÍTICO: Seleccionar eth1!).", risk: "Alto"},
+                {name: "fix-golden-network-order.sh", use: "Apaga NIC1 y altera BIOS virtual para forzar arranque de red.", risk: "Alto"},
+                {name: "04-deploy-target.sh", use: "Despliega VM vacía (Alpine) que recibirá la imagen por PXE.", risk: "Nulo"},
+                {name: "98-destroy-infra.sh", use: "Destruye VMs y discos asociados usando vagrant destroy -f.", risk: "Alto"},
+                {name: "99-destroy-network.sh", use: "Elimina la red puente LabCEFIRE y restaura adaptadores.", risk: "Alto"}
+            ],
+            flow: [
+                {title: "Red Híbrida", cmd: "01-setup-network.sh"},
+                {title: "FOG Server", cmd: "03-deploy-fog.sh + installfog.sh"},
+                {title: "Golden VM", cmd: "02-deploy-golden.sh + Sysprep"},
+                {title: "Capturar PXE", cmd: "fix-golden-network-order.sh → FOG Web"},
+                {title: "Desplegar", cmd: "04-deploy-target.sh → Partclone"}
+            ],
+            flags: [
+                {name: "FOS (FOG Operating System)", desc: "Micro-Linux minimalista cargado directamente en la memoria RAM del cliente cuya única misión es clonar el disco y reiniciarse sin dejar rastro."},
+                {name: "Partclone", desc: "Motor de clonación que copia discos a nivel de bloque (ceros y unos), no a nivel de archivo. Se salta el espacio vacío para mayor velocidad."},
+                {name: "Resizable", desc: "Tipo de imagen que encoge/expande particiones (ej. ext4). Permite desplegar imágenes en discos más pequeños que el original."},
+                {name: "RAW (Non-Resizable)", desc: "Copia exacta sector a sector. Obligatorio para discos con LVM complejos, particiones OEM o sistemas cifrados."},
+                {name: "undionly.kpxe / ipxe.efi", desc: "Archivos entregados por la opción 67 del DHCP según la placa base: Legacy BIOS (.kpxe) o UEFI (.efi)."}
+            ],
+            boxes: [
+                {name: "DHCP (isc-dhcp-server)", desc: "Asigna IPs a los clientes y entrega las Opciones 66 (Next-Server) y 67 (Bootfile) para iniciar el arranque PXE.", icon: "bi bi-router"},
+                {name: "TFTP (tftpd-hpa)", desc: "Protocolo ultraligero que transfiere los archivos de arranque iniciales (ipxe.efi o undionly.kpxe) al cliente.", icon: "bi bi-upload"},
+                {name: "NFS (nfs-kernel-server)", desc: "Comparte la carpeta /images/ del servidor. Los clientes leen/escriben los bloques de disco directamente a velocidades de Gigabit.", icon: "bi bi-folder-symlink"},
+                {name: "Multicast (udpcast)", desc: "Transmite la imagen simultáneamente a múltiples clientes. 30 equipos se clonan en el tiempo de uno solo.", icon: "bi bi-broadcast"}
+            ]
+        }
+    },
+    methods: {
+        riskClass(level) {
+            const classes = {
+                'Nulo': 'bg-emerald-100 text-emerald-700',
+                'Bajo': 'bg-blue-100 text-blue-700',
+                'Medio': 'bg-amber-100 text-amber-700',
+                'Variable': 'bg-purple-100 text-purple-700',
+                'Alto': 'bg-rose-100 text-rose-700'
+            }
+            return classes[level] || 'bg-slate-100 text-slate-700'
+        },
+        riskIcon(level) {
+            const icons = {
+                'Nulo': 'bi bi-check-circle-fill',
+                'Bajo': 'bi bi-info-circle-fill',
+                'Medio': 'bi bi-exclamation-circle-fill',
+                'Variable': 'bi bi-reception-3',
+                'Alto': 'bi bi-exclamation-triangle-fill'
+            }
+            return icons[level] || 'bi bi-question-circle-fill'
+        }
+    }
+}).mount("#app")
+</script>
+
+</body>
+</html>

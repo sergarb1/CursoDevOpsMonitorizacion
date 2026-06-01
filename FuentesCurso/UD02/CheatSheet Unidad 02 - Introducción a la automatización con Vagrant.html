@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Unidad 02 · Introducción a la automatización con Vagrant · CheatSheet</title>
+
+<!-- Fonts & Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+<!-- Libraries -->
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Plus Jakarta Sans', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
+      },
+      colors: {
+        vagrant: {
+          50: '#f0f4ff',
+          100: '#e0e9fe',
+          200: '#c1d3fe',
+          300: '#91b1fd',
+          400: '#5a87fa',
+          500: '#355df5',
+          600: '#233ee9',
+          700: '#1c2fd5',
+          800: '#1d29ad',
+          900: '#1d2889',
+          950: '#161a53',
+        },
+      }
+    }
+  }
+}
+</script>
+
+<style type="text/tailwindcss">
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased selection:bg-vagrant-100 selection:text-vagrant-900;
+  }
+}
+
+@layer components {
+  .section-card {
+    @apply bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow duration-300;
+  }
+  .code-inline {
+    @apply font-mono text-sm bg-slate-100 text-vagrant-700 px-1.5 py-0.5 rounded-md border border-slate-200;
+  }
+  .btn-badge {
+    @apply px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider inline-flex items-center;
+  }
+}
+
+pre {
+  @apply font-mono text-sm bg-slate-900 text-slate-100 p-4 rounded-xl overflow-x-auto border border-slate-800 my-4 shadow-inner;
+}
+
+.gradient-bg {
+  background: radial-gradient(circle at top right, rgba(53, 93, 245, 0.05), transparent),
+              radial-gradient(circle at bottom left, rgba(53, 93, 245, 0.05), transparent);
+}
+
+@media print {
+  @page { margin: 1cm; }
+  .no-print { display: none !important; }
+  
+  /* Reset body and app for print flow */
+  body { 
+    background: white !important; 
+    min-height: 0 !important; 
+    padding: 0 !important; 
+    margin: 0 !important;
+    color: black !important;
+  }
+  
+  #app { 
+    max-width: none !important; 
+    padding: 0 !important; 
+    margin: 0 !important;
+    display: block !important; /* Block flow is most stable for print */
+  }
+
+  header { 
+    @apply border-b border-slate-200 mb-4 pb-4 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: flex-end !important;
+    break-inside: avoid !important;
+  }
+
+  /* Force grid to stack or 2-column for stability */
+  .grid { 
+    display: block !important; /* Stacking avoids "all or nothing" page jumps */
+  }
+
+  .section-card { 
+    @apply mb-4 p-4 border border-slate-200 rounded-lg !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    box-shadow: none !important;
+  }
+
+  /* Column widths in stack mode */
+  .lg\:col-span-2, .space-y-6 { 
+    width: 100% !important; 
+    margin: 0 !important;
+  }
+
+  /* Typography adjustments */
+  h1 { font-size: 24pt !important; }
+  h2 { font-size: 16pt !important; }
+  p, td, li { font-size: 10pt !important; }
+  pre { 
+    font-size: 8pt !important; 
+    white-space: pre-wrap !important;
+    @apply p-2 my-2 bg-slate-50 text-slate-900 border border-slate-200 !important;
+  }
+  
+  .gradient-bg { background: none !important; }
+}
+</style>
+</head>
+
+<body class="gradient-bg min-h-screen pb-12">
+<div id="app" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+
+  <!-- Header -->
+  <header class="mb-10 text-center sm:text-left flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-8">
+    <div>
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-vagrant-100 text-vagrant-700 text-xs font-bold mb-4 uppercase tracking-widest">
+        <i class="bi bi-gear-fill"></i> Infrastructure as Code
+      </div>
+      <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 flex items-center gap-3 justify-center sm:justify-start">
+        <span class="bg-vagrant-500 text-white p-2 rounded-xl shadow-lg shadow-vagrant-200">
+          <i class="bi bi-box-seam"></i>
+        </span>
+        Vagrant CheatSheet
+      </h1>
+      <p class="mt-2 text-lg text-slate-500 font-medium">
+        DevOps. Automatización y monitorización de infraestructuras
+      </p>
+    </div>
+    <div class="hidden sm:block text-right">
+      <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">Unidad 02. Introducción a la automatización con Vagrant</p>
+      <p class="text-sm font-semibold text-slate-600">Entornos Virtuales</p>
+    </div>
+  </header>
+
+  <!-- Dashboard Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Left Column: Commands -->
+    <div class="lg:col-span-2 space-y-6">
+      
+      <!-- Essential Commands -->
+      <section class="section-card">
+        <h2 class="text-xl font-bold flex items-center gap-2 mb-6 border-b border-slate-100 pb-4">
+          <i class="bi bi-terminal-fill text-vagrant-500"></i>
+          1. Comandos de Gestión
+        </h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm text-left">
+            <thead class="text-xs text-slate-500 uppercase font-bold bg-slate-50/50">
+              <tr>
+                <th class="px-4 py-3 rounded-l-lg italic">Comando</th>
+                <th class="px-4 py-3">Función Principal</th>
+                <th class="px-4 py-3 rounded-r-lg">Nivel de Riesgo</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr v-for="cmd in commands" :key="cmd.name" class="hover:bg-slate-50/50 transition-colors">
+                <td class="px-4 py-3 font-mono font-medium text-vagrant-600">{{ cmd.name }}</td>
+                <td class="px-4 py-3 text-slate-600">{{ cmd.use }}</td>
+                <td class="px-4 py-3">
+                  <span :class="riskClass(cmd.risk)" class="btn-badge">
+                    <i :class="riskIcon(cmd.risk)" class="mr-1"></i>
+                    {{ cmd.risk }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="mt-6 p-4 bg-amber-50 rounded-xl border border-amber-100 flex gap-3 items-start">
+          <i class="bi bi-lightbulb-fill text-amber-500 mt-1"></i>
+          <p class="text-sm text-amber-800">
+            <strong>Pro Tip:</strong> Usa <code class="code-inline">vagrant global-status</code> para ver todas las VMs activas en tu sistema, independientemente del directorio actual.
+          </p>
+        </div>
+      </section>
+
+      <!-- Networking & Synced Folders -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <section class="section-card">
+          <h3 class="text-lg font-bold flex items-center gap-2 mb-4">
+            <i class="bi bi-hdd-network text-vagrant-500"></i> Redes
+          </h3>
+          <ul class="space-y-3 text-sm">
+            <li class="flex flex-col gap-1 p-3 bg-slate-50 rounded-lg">
+              <span class="font-bold text-slate-700">Puerto Reenviado</span>
+              <code class="text-[11px]">config.vm.network "forwarded_port", guest: 80, host: 8080</code>
+            </li>
+            <li class="flex flex-col gap-1 p-3 bg-slate-50 rounded-lg">
+              <span class="font-bold text-slate-700">Red Privada (Host-Only)</span>
+              <code class="text-[11px]">config.vm.network "private_network", ip: "192.168.56.10"</code>
+            </li>
+            <li class="flex flex-col gap-1 p-3 bg-slate-50 rounded-lg">
+              <span class="font-bold text-slate-700">Red Pública (Bridge)</span>
+              <code class="text-[11px]">config.vm.network "public_network"</code>
+            </li>
+          </ul>
+        </section>
+
+        <section class="section-card">
+          <h3 class="text-lg font-bold flex items-center gap-2 mb-4">
+            <i class="bi bi-folder-symlink text-vagrant-500"></i> Carpetas
+          </h3>
+          <p class="text-sm text-slate-600 mb-4">Sincroniza archivos entre tu host y la VM en tiempo real.</p>
+          <div class="p-3 bg-slate-900 rounded-lg shadow-inner">
+            <code class="text-[11px] text-emerald-400 block">config.vm.synced_folder "./data", "/var/www/html"</code>
+          </div>
+          <ul class="mt-4 space-y-2 text-xs text-slate-500">
+            <li class="flex items-center gap-2"><i class="bi bi-check2 text-emerald-500"></i> El primer parámetro es el Host.</li>
+            <li class="flex items-center gap-2"><i class="bi bi-check2 text-emerald-500"></i> El segundo parámetro es el Guest.</li>
+          </ul>
+        </section>
+      </div>
+
+      <!-- Advanced Box Management -->
+      <section class="section-card">
+        <h2 class="text-xl font-bold flex items-center gap-2 mb-6 border-b border-slate-100 pb-4">
+          <i class="bi bi-stack text-vagrant-500"></i>
+          2. Gestión de Boxes (Plantillas)
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div v-for="box in boxes" :key="box.name" class="p-4 border border-slate-100 rounded-xl hover:border-vagrant-200 transition-colors bg-slate-50/30">
+            <div class="font-mono text-sm text-vagrant-700 font-bold mb-1">{{ box.name }}</div>
+            <div class="text-xs text-slate-500">{{ box.desc }}</div>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <!-- Right Column: Config & Flow -->
+    <div class="space-y-6">
+      
+      <!-- Flow Card -->
+      <section class="section-card bg-vagrant-950 text-white border-none shadow-xl shadow-vagrant-200">
+        <h2 class="text-xl font-bold flex items-center gap-2 mb-6 border-b border-white/10 pb-4">
+          <i class="bi bi-arrow-repeat text-vagrant-400"></i>
+          Ciclo de Vida
+        </h2>
+        <div class="relative pl-8 space-y-6 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-white/10">
+          <div v-for="(step, i) in flow" :key="i" class="relative">
+            <span class="absolute -left-[28px] top-1 w-5 h-5 rounded-full bg-vagrant-500 border-4 border-vagrant-950 text-[10px] flex items-center justify-center font-bold">
+              {{ i + 1 }}
+            </span>
+            <div class="font-bold text-sm">{{ step.title }}</div>
+            <code class="text-[11px] text-vagrant-300">{{ step.cmd }}</code>
+          </div>
+        </div>
+      </section>
+
+      <!-- Vagrantfile Example -->
+      <section class="section-card">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold flex items-center gap-2">
+            <i class="bi bi-file-code-fill text-vagrant-500"></i>
+            Vagrantfile
+          </h2>
+          <span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded uppercase">Ruby DSL</span>
+        </div>
+<pre class="!m-0 text-[11px] leading-relaxed"><span class="text-blue-400 italic"># Configuración versión 2</span>
+Vagrant.configure(<span class="text-amber-400">"2"</span>) <span class="text-purple-400">do</span> |config|
+  <span class="text-blue-400 italic"># Definir imagen (Box) y Hostname</span>
+  config.vm.box = <span class="text-amber-400">"ubuntu/jammy64"</span>
+  config.vm.hostname = <span class="text-amber-400">"nodo-devops"</span>
+
+  <span class="text-blue-400 italic"># Recursos Hardware (VirtualBox)</span>
+  config.vm.provider <span class="text-amber-400">"virtualbox"</span> <span class="text-purple-400">do</span> |vb|
+    vb.memory = <span class="text-emerald-400">2048</span>
+    vb.cpus = <span class="text-emerald-400">2</span>
+    vb.name = <span class="text-amber-400">"maquina-automatizada"</span>
+  <span class="text-purple-400">end</span>
+
+  <span class="text-blue-400 italic"># Aprovisionamiento (Shell, Ansible, etc.)</span>
+  config.vm.provision <span class="text-amber-400">"shell"</span>, 
+    inline: <span class="text-amber-400">"apt update && apt install nginx -y"</span>
+<span class="text-purple-400">end</span></pre>
+      </section>
+
+      <!-- Automation Bonus -->
+      <section class="section-card bg-indigo-50 border-indigo-100">
+        <h2 class="text-sm font-bold uppercase tracking-widest text-indigo-400 mb-4 flex items-center gap-2">
+          <i class="bi bi-rocket-takeoff-fill"></i> Nivel Pro: Automatización
+        </h2>
+        <p class="text-xs text-indigo-800 mb-3">
+          Vagrant brilla cuando lo conectas con provisionadores profesionales:
+        </p>
+        <div class="flex flex-wrap gap-2">
+          <span class="px-2 py-1 bg-white rounded border border-indigo-200 text-[10px] font-bold text-indigo-600">ANSIBLE</span>
+          <span class="px-2 py-1 bg-white rounded border border-indigo-200 text-[10px] font-bold text-indigo-600">CHEF</span>
+          <span class="px-2 py-1 bg-white rounded border border-indigo-200 text-[10px] font-bold text-indigo-600">PUPPET</span>
+          <span class="px-2 py-1 bg-white rounded border border-indigo-200 text-[10px] font-bold text-indigo-600">DOCKER</span>
+        </div>
+      </section>
+
+      <!-- Focus Tip -->
+      <section class="section-card border-dashed border-2 border-slate-200 bg-transparent">
+        <div class="flex items-center gap-3">
+          <div class="text-2xl">⏱️</div>
+          <div>
+            <h4 class="text-xs font-bold text-slate-700 uppercase">Pausa Técnica</h4>
+            <p class="text-[11px] text-slate-500 italic">
+              "Si el `vagrant up` tarda porque la imagen es pesada, ¡no te pierdas en las pestañas del navegador! Aprovecha para estirar o beber agua. Tu foco vale más que 2GB de descarga."
+            </p>
+          </div>
+        </div>
+      </section>
+      <!-- Troubleshooting & Tips -->
+      <section class="section-card bg-rose-50 border-rose-100">
+        <h2 class="text-sm font-bold uppercase tracking-widest text-rose-500 mb-4 flex items-center gap-2">
+          <i class="bi bi-exclamation-octagon-fill"></i> S.O.S. Troubleshooting
+        </h2>
+        <div class="space-y-3">
+          <div class="p-3 bg-white rounded-lg border border-rose-100">
+            <div class="text-xs font-bold text-rose-700">¿Puerto 8080 ya en uso?</div>
+            <p class="text-[10px] text-slate-600">Cambia el host port en el Vagrantfile o usa <code class="bg-slate-100 px-1 rounded">auto_correct: true</code></p>
+          </div>
+          <div class="p-3 bg-white rounded-lg border border-rose-100">
+            <div class="text-xs font-bold text-rose-700">¿Error de Virtualización?</div>
+            <p class="text-[10px] text-slate-600">Verifica que <strong>VT-x/AMD-V</strong> esté habilitado en la BIOS de tu PC.</p>
+          </div>
+          <div class="p-3 bg-white rounded-lg border border-rose-100">
+            <div class="text-xs font-bold text-rose-700">¿SSH no conecta?</div>
+            <p class="text-[10px] text-slate-600">Usa <code class="bg-slate-100 px-1 rounded">vagrant ssh-config</code> para ver los detalles de conexión manual.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Essential Plugins -->
+      <section class="section-card">
+        <h2 class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2">
+          <i class="bi bi-plugin"></i> Plugins Esenciales
+        </h2>
+        <div class="grid grid-cols-1 gap-2">
+          <div class="flex items-center justify-between p-2 bg-slate-50 rounded-lg border border-slate-100">
+            <code class="text-[10px] font-bold text-vagrant-600">vagrant-vbguest</code>
+            <span class="text-[9px] text-slate-500">Auto-update Guest Additions</span>
+          </div>
+          <div class="flex items-center justify-between p-2 bg-slate-50 rounded-lg border border-slate-100">
+            <code class="text-[10px] font-bold text-vagrant-600">vagrant-disksize</code>
+            <span class="text-[9px] text-slate-500">Redimensiona el disco duro de la VM</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Flags -->
+      <section class="section-card bg-slate-50 border-slate-200">
+        <h2 class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2">
+          <i class="bi bi-flag-fill"></i> Flags Útiles
+        </h2>
+        <div class="space-y-3">
+          <div v-for="flag in flags" :key="flag.name" class="flex items-start gap-2">
+            <code class="text-[10px] font-bold bg-white border border-slate-200 px-1.5 py-0.5 rounded">{{ flag.name }}</code>
+            <span class="text-xs text-slate-600 leading-tight">{{ flag.desc }}</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer class="mt-12 pt-8 border-t border-slate-200 text-center">
+    <div class="flex justify-center gap-6 mb-4 no-print">
+      <a href="#" class="text-slate-400 hover:text-vagrant-500 transition-colors text-xl"><i class="bi bi-github"></i></a>
+      <a href="#" class="text-slate-400 hover:text-vagrant-500 transition-colors text-xl"><i class="bi bi-globe"></i></a>
+    </div>
+    <p class="text-sm font-bold text-slate-800 uppercase tracking-tighter">
+      DevOps. Automatización y monitorización de infraestructuras
+    </p>
+    <p class="text-xs text-slate-400 mt-1">
+      &copy; 2026 · CheatSheet Unidad 02. Introducción a la automatización con Vagrant · Vagrant Virtualization Expert
+    </p>
+    <div class="mt-4 flex justify-center items-center gap-2 opacity-60 hover:opacity-100 transition-opacity">
+      <a rel="license" href="http://creativecommons.org/licenses/by-sa/4.0/" target="_blank" class="flex items-center gap-1 text-[10px] text-slate-500 font-bold uppercase tracking-tighter">
+        <img alt="Licencia Creative Commons" style="border-width:0" src="https://i.creativecommons.org/l/by-sa/4.0/80x15.png" />
+        <span>CC BY-SA 4.0</span>
+      </a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+const { createApp } = Vue
+
+createApp({
+  data(){
+    return {
+      commands: [
+        {name: "vagrant init", use: "Inicializa un Vagrantfile en el dir actual", risk: "Nulo"},
+        {name: "vagrant up", use: "Crea y arranca la máquina virtual", risk: "Bajo"},
+        {name: "vagrant halt", use: "Apagado controlado de la VM", risk: "Nulo"},
+        {name: "vagrant reload", use: "Reinicia aplicando cambios del Vagrantfile", risk: "Medio"},
+        {name: "vagrant ssh", use: "Conecta por terminal a la VM", risk: "Nulo"},
+        {name: "vagrant provision", use: "Ejecuta scripts de configuración", risk: "Variable"},
+        {name: "vagrant status", use: "Muestra el estado de la VM local", risk: "Nulo"},
+        {name: "vagrant destroy -f", use: "Elimina la VM y sus discos (Irreversible)", risk: "Alto"},
+        {name: "vagrant snapshot save", use: "Guarda el estado actual (Punto de control)", risk: "Bajo"},
+        {name: "vagrant validate", use: "Valida la sintaxis del Vagrantfile", risk: "Nulo"},
+        {name: "vagrant box prune", use: "Limpia versiones antiguas de boxes", risk: "Bajo"},
+        {name: "vagrant port", use: "Muestra colisiones y mapeo de puertos", risk: "Nulo"}
+      ],
+      flow: [
+        {title: "Configurar", cmd: "vagrant init ubuntu/jammy64"},
+        {title: "Desplegar", cmd: "vagrant up"},
+        {title: "Acceder", cmd: "vagrant ssh"},
+        {title: "Modificar", cmd: "vagrant reload --provision"},
+        {title: "Limpiar", cmd: "vagrant destroy -f"}
+      ],
+      flags: [
+        {name: "--provider", desc: "Forzar backend (virtualbox, libvirt, docker)"},
+        {name: "--provision", desc: "Fuerza la ejecución de provisioners al arrancar"},
+        {name: "--no-provision", desc: "Ignora scripts de provisión al arrancar"},
+        {name: "-f / --force", desc: "No pide confirmación para acciones destructivas"},
+        {name: "--debug", desc: "Muestra logs detallados (ideal para troubleshooting)"}
+      ],
+      boxes: [
+        {name: "vagrant box add", desc: "Descarga una plantilla al sistema local"},
+        {name: "vagrant box list", desc: "Muestra todas las plantillas instaladas"},
+        {name: "vagrant box remove", desc: "Elimina una plantilla para liberar espacio"},
+        {name: "vagrant box update", desc: "Actualiza a la versión más reciente del cloud"}
+      ]
+    }
+  },
+  methods: {
+    riskClass(level) {
+      const classes = {
+        'Nulo': 'bg-emerald-100 text-emerald-700',
+        'Bajo': 'bg-blue-100 text-blue-700',
+        'Medio': 'bg-amber-100 text-amber-700',
+        'Variable': 'bg-purple-100 text-purple-700',
+        'Alto': 'bg-rose-100 text-rose-700'
+      }
+      return classes[level] || 'bg-slate-100 text-slate-700'
+    },
+    riskIcon(level) {
+      const icons = {
+        'Nulo': 'bi bi-check-circle-fill',
+        'Bajo': 'bi bi-info-circle-fill',
+        'Medio': 'bi bi-exclamation-circle-fill',
+        'Variable': 'bi bi-reception-3',
+        'Alto': 'bi bi-exclamation-triangle-fill'
+      }
+      return icons[level] || 'bi bi-question-circle-fill'
+    }
+  }
+}).mount("#app")
+</script>
+
+</body>
+</html>

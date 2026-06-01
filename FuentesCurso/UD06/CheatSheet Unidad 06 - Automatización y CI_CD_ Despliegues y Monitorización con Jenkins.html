@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chuleta DevOps · CI/CD & Observabilidad</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin:0; padding:0; box-sizing:border-box; }
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: white;
+            color: #1e293b;
+            font-size: 8.5pt;
+            line-height: 1.35;
+        }
+        .page {
+            max-width: 190mm;
+            margin: 0 auto;
+            padding: 6mm;
+        }
+        h1 {
+            font-size: 15pt;
+            font-weight: 800;
+            color: #1e293b;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-bottom: 8px;
+            border-bottom: 2px solid #355df5;
+            padding-bottom: 5px;
+        }
+        h1 span { background: #355df5; color: white; padding: 3px 7px; border-radius: 5px; }
+        h2 {
+            font-size: 9pt;
+            font-weight: 700;
+            color: #355df5;
+            margin: 8px 0 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-left: 3px solid #355df5;
+            padding-left: 5px;
+        }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .col { background: #f8fafc; border-radius: 6px; padding: 6px; }
+        .cmd-table { width: 100%; font-size: 7.5pt; border-collapse: collapse; }
+        .cmd-table td { padding: 2px 3px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+        .cmd-table td:first-child { font-family: 'JetBrains Mono', monospace; color: #1c2fd5; white-space: nowrap; width: 48%; }
+        .metric-table { width: 100%; font-size: 7pt; border-collapse: collapse; margin-top: 3px; }
+        .metric-table th { text-align: left; color: #64748b; font-weight: 600; padding: 2px 3px; }
+        .metric-table td { padding: 2px 3px; border-bottom: 1px solid #e2e8f0; vertical-align: top; }
+        .pipeline { display: flex; flex-wrap: wrap; gap: 3px; margin: 5px 0; font-size: 7pt; }
+        .step { background: #355df5; color: white; padding: 2px 5px; border-radius: 10px; font-weight: 600; }
+        .arrow { color: #94a3b8; font-weight: bold; font-size: 7pt; }
+        .concept { font-size: 7pt; margin-bottom: 3px; }
+        .concept strong { color: #1c2fd5; }
+        code { font-family: 'JetBrains Mono', monospace; background: #e2e8f0; padding: 1px 2px; border-radius: 2px; font-size: 7pt; }
+        .highlight-box { background: #e0e7ff; border-left: 3px solid #355df5; padding: 4px 6px; border-radius: 4px; margin: 4px 0; font-size: 7pt; }
+        .two-col { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+        @media print {
+            body { background: white; }
+            .page { box-shadow: none; padding: 4mm; }
+        }
+    </style>
+</head>
+<body>
+    <div class="page">
+        <h1><span>⚙️</span> DevOps CI/CD + Observabilidad</h1>
+
+        <div class="grid">
+            <!-- COLUMNA IZQUIERDA: Git, Docker, Terraform -->
+            <div class="col">
+                <h2>🐙 Git esencial</h2>
+                <table class="cmd-table">
+                    <tr><td>git clone &lt;repo&gt;</td><td>Clonar repositorio</td></tr>
+                    <tr><td>git add . && git commit -m ""</td><td>Preparar y confirmar cambios</td></tr>
+                    <tr><td>git push / git pull</td><td>Subir / bajar cambios</td></tr>
+                    <tr><td>git branch / checkout -b &lt;r&gt;</td><td>Listar / crear rama</td></tr>
+                    <tr><td>git merge &lt;rama&gt;</td><td>Fusionar rama en la actual</td></tr>
+                    <tr><td>git log --oneline</td><td>Historial compacto</td></tr>
+                    <tr><td>git tag v1.0 && git push --tags</td><td>Etiquetar versión</td></tr>
+                </table>
+
+                <h2>🐳 Docker esencial</h2>
+                <table class="cmd-table">
+                    <tr><td>docker build -t app:1.0 .</td><td>Construir imagen</td></tr>
+                    <tr><td>docker images / docker ps</td><td>Listar imágenes / contenedores</td></tr>
+                    <tr><td>docker logs -f &lt;cont&gt;</td><td>Seguir logs</td></tr>
+                    <tr><td>docker exec -it &lt;cont&gt; sh</td><td>Entrar al contenedor</td></tr>
+                    <tr><td>docker stop / rm &lt;cont&gt;</td><td>Detener / eliminar</td></tr>
+                    <tr><td>docker compose up -d / down</td><td>Levantar / tumbar stack</td></tr>
+                    <tr><td>docker system prune -f</td><td>Limpiar recursos huérfanos</td></tr>
+                </table>
+
+                <h2>🏗️ Terraform esencial</h2>
+                <table class="cmd-table">
+                    <tr><td>terraform init</td><td>Inicializar (descargar providers)</td></tr>
+                    <tr><td>terraform validate / fmt</td><td>Validar sintaxis / formatear</td></tr>
+                    <tr><td>terraform plan</td><td>Previsualizar cambios</td></tr>
+                    <tr><td>terraform apply</td><td>Aplicar infraestructura</td></tr>
+                    <tr><td>terraform destroy</td><td>Eliminar todos los recursos</td></tr>
+                    <tr><td>terraform state list</td><td>Listar recursos del estado</td></tr>
+                </table>
+            </div>
+
+            <!-- COLUMNA DERECHA: Jenkins ampliado, Pipeline, Métricas, Conceptos -->
+            <div class="col">
+                <h2>🤖 Jenkins · Comandos</h2>
+                <table class="cmd-table">
+                    <tr><td>java -jar jenkins.war</td><td>Iniciar Jenkins standalone</td></tr>
+                    <tr><td>jenkins-plugin-cli --list</td><td>Plugins instalados</td></tr>
+                    <tr><td>jenkins-plugin-cli --plugins git docker-workflow</td><td>Instalar plugins vía CLI</td></tr>
+                    <tr><td>curl -X POST JENKINS_URL/job/&lt;job&gt;/build</td><td>Disparar build (API REST)</td></tr>
+                    <tr><td>curl JENKINS_URL/job/&lt;job&gt;/lastBuild/api/json</td><td>Consultar estado del último build</td></tr>
+                    <tr><td>curl -X POST JENKINS_URL/job/&lt;job&gt;/doDelete</td><td>Eliminar un job</td></tr>
+                    <tr><td>curl JENKINS_URL/crumbIssuer/api/json</td><td>Obtener token CSRF</td></tr>
+                    <tr><td>docker restart jenkins</td><td>Reiniciar contenedor Jenkins</td></tr>
+                </table>
+
+                <div class="highlight-box">
+                    <strong>⚠️ CSRF:</strong> Jenkins exige un <em>crumb</em> para peticiones POST. Se obtiene con <code>curl .../crumbIssuer/api/json</code> y se envía en el header <code>Jenkins-Crumb: &lt;token&gt;</code>.
+                </div>
+
+                <div class="two-col">
+                    <div>
+                        <h2>🧩 Conceptos Jenkins</h2>
+                        <div class="concept"><strong>Pipeline Declarativo:</strong> estructura rígida con <code>pipeline</code>, <code>stages</code>, <code>steps</code>. Más legible y mantenible.</div>
+                        <div class="concept"><strong>Pipeline Scripted:</strong> Groovy puro, más flexible pero más complejo.</div>
+                        <div class="concept"><strong>Job / Build:</strong> job = tarea configurada; build = ejecución concreta de un job.</div>
+                        <div class="concept"><strong>Trigger:</strong> polling SCM (<code>H/2 * * * *</code>), webhooks, o disparo manual.</div>
+                        <div class="concept"><strong>Agent:</strong> dónde se ejecuta el pipeline (<code>agent any</code>, <code>agent docker</code>, <code>agent none</code>).</div>
+                    </div>
+                    <div>
+                        <h2>🔌 Plugins vitales</h2>
+                        <div class="concept"><strong>Git:</strong> clonar repositorios.</div>
+                        <div class="concept"><strong>Docker Workflow:</strong> construir imágenes.</div>
+                        <div class="concept"><strong>Credentials Binding:</strong> inyectar secretos.</div>
+                        <div class="concept"><strong>Prometheus:</strong> exponer métricas.</div>
+                        <div class="concept"><strong>Blue Ocean:</strong> UI moderna de pipelines.</div>
+                        <h2>🏗️ Tipos de jobs</h2>
+                        <div class="concept"><strong>Freestyle:</strong> interfaz web, scripts sueltos.</div>
+                        <div class="concept"><strong>Pipeline:</strong> Jenkinsfile (recomendado).</div>
+                        <div class="concept"><strong>Multibranch:</strong> un pipeline por rama.</div>
+                    </div>
+                </div>
+
+                <h2>📄 Jenkinsfile declarativo</h2>
+                <pre style="font-size:6.5pt; background:#1e293b; color:#e2e8f0; padding:4px; border-radius:4px; margin-top:3px; line-height:1.3;">
+pipeline {
+    agent any
+    environment { APP_NAME = "miapp" }
+    stages {
+        stage('Checkout') { steps { checkout scm } }
+        stage('Build')    { steps { sh 'npm ci' } }
+        stage('Test')     { steps { sh 'npm test' } }
+        stage('Package')  { steps { sh "docker build -t ${APP_NAME}:${BUILD_ID} ." } }
+        stage('Deploy Staging') {
+            steps { sh "docker run -d --name ${APP_NAME}-staging ${APP_NAME}:${BUILD_ID}" }
+        }
+        stage('Smoke Test') {
+            steps {
+                sleep 10
+                sh "curl -s http://staging:3000/health | grep healthy"
+            }
+        }
+        stage('Approval') {
+            steps { input message: '¿Desplegar a producción?', ok: 'Desplegar' }
+        }
+        stage('Deploy Production') {
+            steps { sh "docker run -d --name ${APP_NAME}-prod ${APP_NAME}:${BUILD_ID}" }
+        }
+    }
+    post {
+        success { echo '✅ Pipeline completado' }
+        failure { echo '❌ Pipeline fallido' }
+    }
+}
+                </pre>
+
+                <div class="highlight-box">
+                    <strong>💡 Notas:</strong> <code>BUILD_ID</code> = número único del build (mejor que <code>latest</code>). <code>sleep</code> da tiempo a arrancar antes del smoke test. <code>input</code> detiene el pipeline hasta que un humano pulsa "Desplegar" (Continuous Delivery).
+                </div>
+            </div>
+        </div>
+
+        <!-- SEGUNDA FILA: Métricas + Pipeline + Conceptos + Buenas prácticas -->
+        <div class="grid" style="margin-top:8px;">
+            <div class="col">
+                <h2>📊 Métricas clave (PromQL)</h2>
+                <table class="metric-table">
+                    <tr><th>Métrica</th><th>Expresión</th></tr>
+                    <tr><td>CPU host</td><td><code>100 - avg(rate(node_cpu_seconds_total{mode="idle"}[5m]))*100</code></td></tr>
+                    <tr><td>RAM usada %</td><td><code>(1 - node_memory_MemAvailable/...Total)*100</code></td></tr>
+                    <tr><td>Disco /</td><td><code>(1 - node_filesystem_avail/...size)*100</code></td></tr>
+                    <tr><td>Contenedores up</td><td><code>count(container_last_seen)</code></td></tr>
+                    <tr><td>Builds éxito</td><td><code>default_jenkins_builds_success_total</code></td></tr>
+                    <tr><td>Builds fallo</td><td><code>default_jenkins_builds_failed_total</code></td></tr>
+                </table>
+                <div class="concept" style="margin-top:3px;">💡 Usar <code>rate(...[5m])</code> para suavizar picos. <code>container_memory_working_set_bytes</code> (memoria real, excluye cachés).</div>
+            </div>
+            <div class="col">
+                <h2>⚡ Pipeline CI/CD típico</h2>
+                <div class="pipeline">
+                    <span class="step">Checkout</span><span class="arrow">→</span>
+                    <span class="step">Build</span><span class="arrow">→</span>
+                    <span class="step">Test</span><span class="arrow">→</span>
+                    <span class="step">Quality</span><span class="arrow">→</span>
+                    <span class="step">Package</span><span class="arrow">→</span>
+                    <span class="step">Staging</span><span class="arrow">→</span>
+                    <span class="step">Accept</span><span class="arrow">→</span>
+                    <span class="step">Approve</span><span class="arrow">→</span>
+                    <span class="step">Prod</span>
+                </div>
+
+                <h2>📘 Conceptos DevOps</h2>
+                <div class="concept"><strong>CI:</strong> Integrar cambios a menudo + pruebas automáticas.</div>
+                <div class="concept"><strong>CD (Delivery):</strong> App lista para desplegar; producción requiere aprobación manual.</div>
+                <div class="concept"><strong>CD (Deployment):</strong> Despliegue a producción totalmente automático.</div>
+                <div class="concept"><strong>IaC:</strong> Infraestructura como Código (Terraform, CloudFormation).</div>
+                <div class="concept"><strong>Observabilidad:</strong> Métricas (Prometheus) + Logs (Loki/ELK) + Trazas (Jaeger).</div>
+                <div class="concept"><strong>Rollback:</strong> Volver a versión estable anterior de forma inmediata.</div>
+                <div class="concept"><strong>Artefacto:</strong> Producto del pipeline (imagen Docker, JAR, WAR, binario).</div>
+
+                <h2>✅ Buenas prácticas</h2>
+                <div class="concept">✔️ Pipeline como código (Jenkinsfile en Git).</div>
+                <div class="concept">✔️ Imagen inmutable: misma de staging a producción.</div>
+                <div class="concept">✔️ No usar <code>:latest</code>; etiquetar con <code>BUILD_ID</code> o hash del commit.</div>
+                <div class="concept">✔️ Credenciales en Jenkins (Credentials Binding), nunca en código.</div>
+                <div class="concept">✔️ Idempotencia: Terraform y pipelines repetibles sin efectos laterales.</div>
+                <div class="concept">✔️ Separación de entornos (redes, variables de entorno).</div>
+                <div class="concept">✔️ Limpieza periódica: <code>docker system prune -f</code>.</div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

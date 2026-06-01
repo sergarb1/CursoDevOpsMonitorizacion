@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CheatSheet · Unidad 05 · Odoo + DevOps · Métricas & Logs</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: { sans: ['Plus Jakarta Sans', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'] },
+                    colors: { devops: { 50: '#f0f4ff', 100: '#e0e9fe', 200: '#c1d3fe', 300: '#91b1fd', 400: '#5a87fa', 500: '#355df5', 600: '#233ee9', 700: '#1c2fd5', 800: '#1d29ad', 900: '#1d2889', 950: '#161a53' } }
+                }
+            }
+        }
+    </script>
+    <style>
+        @layer base { body { @apply bg-slate-50 text-slate-900 antialiased; } }
+        @layer components { .section-card { @apply bg-white rounded-2xl p-6 shadow-sm border border-slate-200; } .code-inline { @apply font-mono text-sm bg-slate-100 text-devops-700 px-1.5 py-0.5 rounded-md border border-slate-200; } .btn-badge { @apply px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider inline-flex items-center; } }
+        pre { @apply font-mono text-sm bg-slate-900 text-slate-100 p-4 rounded-xl overflow-x-auto border border-slate-800 my-4 shadow-inner; }
+        .gradient-bg { background: radial-gradient(circle at top right, rgba(53, 93, 245, 0.04), transparent 60%), radial-gradient(circle at bottom left, rgba(53, 93, 245, 0.04), transparent 60%); }
+        @media print { @page { margin: 1cm; } .no-print { display: none; } body { background: white; font-size: 9pt; } .section-card { break-inside: avoid; } pre { white-space: pre-wrap; background: #f8fafc; color: #1e293b; } }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen pb-12">
+    <div id="app" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+
+        <!-- Header -->
+        <header class="mb-10 text-center sm:text-left flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-8">
+            <div>
+                <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-devops-100 text-devops-700 text-xs font-bold mb-4 uppercase tracking-widest">
+                    <i class="bi bi-cpu-fill"></i> Unidad 05 · Observabilidad & Automatización
+                </div>
+                <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 flex items-center gap-3 justify-center sm:justify-start">
+                    <span class="bg-devops-500 text-white p-2 rounded-xl shadow-lg shadow-devops-200">
+                        <i class="bi bi-box-seam-fill"></i>
+                    </span>
+                    DevOps · Odoo ERP
+                </h1>
+                <p class="mt-2 text-lg text-slate-500 font-medium">Terraform · Salt · Prometheus · Loki · Alloy</p>
+            </div>
+            <div class="hidden sm:block text-right">
+                <p class="text-xs text-slate-400 font-bold uppercase">Stack completo</p>
+                <p class="text-sm font-semibold text-slate-600">Métricas + Logs + Caos</p>
+            </div>
+        </header>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+            <!-- COLUMNA IZQUIERDA (2/3) - Tecnologías y conceptos clave -->
+            <div class="lg:col-span-2 space-y-6">
+
+                <!-- 1. Tecnologías en pocas palabras -->
+                <section class="section-card border-l-4 border-l-devops-500">
+                    <h2 class="text-xl font-bold flex items-center gap-2 mb-4 border-b border-slate-100 pb-3">
+                        <i class="bi bi-tools text-devops-500"></i> 1. Tecnologías esenciales
+                    </h2>
+                    <div class="space-y-3">
+                        <div v-for="tool in tools" :key="tool.name" class="flex items-start gap-3 text-sm">
+                            <i :class="tool.icon" class="text-devops-500 text-xl mt-0.5 shrink-0"></i>
+                            <div>
+                                <span class="font-bold text-devops-700">{{ tool.name }}:</span>
+                                <span class="text-slate-600">{{ tool.desc }}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 grid grid-cols-2 gap-3 text-xs">
+                        <div class="bg-rose-50 p-2 rounded border border-rose-200"><strong class="text-rose-700">Whitebox</strong> exporter interno (odoo-exporter.py) → métricas de negocio</div>
+                        <div class="bg-emerald-50 p-2 rounded border border-emerald-200"><strong class="text-emerald-700">Blackbox</strong> sondeos externos HTTP/ICMP → disponibilidad</div>
+                        <div class="bg-sky-50 p-2 rounded border border-sky-200"><strong class="text-sky-700">Loki + Alloy</strong> logs sin agente: Alloy monta /var/run/docker.sock y etiqueta cada línea</div>
+                        <div class="bg-amber-50 p-2 rounded border border-amber-200"><strong class="text-amber-700">cAdvisor</strong> métricas por contenedor (CPU, RAM, red) – <code>container_memory_working_set_bytes</code></div>
+                    </div>
+                </section>
+
+                <!-- 2. PromQL esencial (métricas críticas) -->
+                <section class="section-card">
+                    <h2 class="text-xl font-bold flex items-center gap-2 mb-4">
+                        <i class="bi bi-graph-up-arrow text-devops-500"></i> 2. Métricas clave y PromQL
+                    </h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-xs border-collapse">
+                            <thead><tr class="text-slate-400 uppercase font-bold bg-slate-50"><th class="p-2 text-left">Métrica</th><th class="p-2 text-left">Expresión PromQL</th><th class="p-2 text-left">Qué indica</th></tr></thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <tr v-for="m in metrics" :key="m.name"><td class="p-2 font-bold text-devops-700">{{ m.name }}</td><td class="p-2 font-mono text-[10px]">{{ m.expr }}</td><td class="p-2 text-slate-600">{{ m.desc }}</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="mt-3 text-xs text-slate-500 bg-slate-50 p-2 rounded">
+                        <i class="bi bi-lightbulb-fill text-amber-500"></i> <strong>Latencia:</strong> <code>odoo_query_duration_seconds</code> > 0.5s → revisar índices PostgreSQL.<br>
+                        <strong>Memoria real:</strong> usar <code>container_memory_working_set_bytes</code> (no <code>usage_bytes</code> que incluye cachés).
+                    </div>
+                </section>
+
+                <!-- 3. Comandos esenciales (sin scripts) -->
+                <section class="section-card">
+                    <h2 class="text-xl font-bold flex items-center gap-2 mb-4 border-b border-slate-100 pb-3">
+                        <i class="bi bi-terminal-fill text-devops-500"></i> 3. Comandos de oro
+                    </h2>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead><tr class="text-xs text-slate-500 uppercase"><th class="px-3 py-2 text-left">Comando</th><th class="px-3 py-2 text-left">Para qué sirve</th></tr></thead>
+                            <tbody class="divide-y divide-slate-100">
+                                <tr v-for="c in commands" :key="c.cmd"><td class="px-3 py-2 font-mono text-devops-600 text-xs">{{ c.cmd }}</td><td class="px-3 py-2 text-slate-600 text-xs">{{ c.desc }}</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <!-- COLUMNA DERECHA (1/3) - Topología, pipeline, exportadores -->
+            <div class="space-y-6">
+
+                <!-- Pipeline rápido -->
+                <section class="section-card bg-devops-950 text-white border-none shadow-xl shadow-devops-200">
+                    <h2 class="text-xl font-bold flex items-center gap-2 mb-6 border-b border-white/10 pb-4">
+                        <i class="bi bi-hdd-stack text-devops-400"></i> Pipeline (7 pasos)
+                    </h2>
+                    <div class="relative pl-8 space-y-4 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-white/10">
+                        <div v-for="(step, i) in pipeline" :key="i" class="relative">
+                            <span class="absolute -left-[28px] top-1 w-5 h-5 rounded-full bg-devops-500 border-4 border-devops-950 text-[10px] flex items-center justify-center font-bold">{{ i+1 }}</span>
+                            <div class="font-bold text-sm">{{ step.title }}</div>
+                            <code class="text-[10px] text-devops-300">{{ step.cmd }}</code>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Red + IPs fijas -->
+                <section class="section-card">
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="text-lg font-bold flex items-center gap-2"><i class="bi bi-diagram-2-fill text-devops-500"></i> Red LabCEFIRE</h2>
+                        <span class="text-[10px] font-mono">172.28.0.0/24</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-1 text-[11px] font-mono bg-slate-50 p-2 rounded">
+                        <div>🧂 Salt Master</div><div><strong>.50</strong></div>
+                        <div>📊 Prometheus</div><div><strong>.51</strong></div>
+                        <div>🐳 cAdvisor</div><div><strong>.52</strong></div>
+                        <div>🖤 Blackbox</div><div><strong>.53</strong></div>
+                        <div>📈 Grafana</div><div><strong>.56</strong></div>
+                        <div>🐍 Odoo 1</div><div><strong>.57</strong></div>
+                        <div>🐍 Odoo 2 (opcional)</div><div><strong>.58</strong></div>
+                        <div>🐘 PostgreSQL 1</div><div><strong>.59</strong></div>
+                    </div>
+                    <p class="text-[10px] text-slate-500 mt-2">IPs estáticas evitan dependencia DNS. Para <strong>bajos recursos</strong> solo .50 .57 .59 .51 .52 .53 .56 (sin .58 .60 ni Loki/Alloy).</p>
+                </section>
+
+                <!-- Exporters + Loki -->
+                <section class="section-card bg-slate-50 border-slate-200">
+                    <h2 class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-3 flex items-center gap-2"><i class="bi bi-diagram-3-fill"></i> Endpoints de telemetría</h2>
+                    <div class="space-y-2">
+                        <div v-for="e in exporters" :key="e.name" class="p-2 bg-white rounded border border-slate-100 text-xs">
+                            <span class="font-mono font-bold text-devops-700">{{ e.name }}</span> <span class="text-slate-400">({{ e.port }})</span>
+                            <p class="text-slate-600 mt-0.5">{{ e.desc }}</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Logs centralizados (Alloy+Loki) -->
+                <section class="section-card border-l-4 border-l-devops-400">
+                    <h2 class="text-sm font-bold uppercase tracking-widest text-devops-600 mb-2 flex items-center gap-2"><i class="bi bi-journal-bookmark-fill"></i> Logs sin agente (Alloy + Loki)</h2>
+                    <div class="text-xs space-y-2">
+                        <p><i class="bi bi-check-circle-fill text-emerald-600"></i> <strong>Alloy</strong> monta <code class="text-xs">/var/run/docker.sock</code> → escucha stdout de todos los contenedores.</p>
+                        <p><i class="bi bi-check-circle-fill text-emerald-600"></i> Añade etiqueta <code>service="odoo-minion-1"</code> automáticamente.</p>
+                        <p><i class="bi bi-check-circle-fill text-emerald-600"></i> <strong>Loki</strong> solo indexa etiquetas (no texto completo) → muy ligero.</p>
+                        <p><code class="text-xs">logql {service="odoo-minion-1"} |= "ERROR"</code> en Grafana Explore.</p>
+                        <p class="text-amber-600 mt-1"><i class="bi bi-exclamation-triangle-fill"></i> En versión <strong>bajos recursos</strong> se elimina para ahorrar RAM → logs con <code>docker logs</code>.</p>
+                    </div>
+                </section>
+            </div>
+        </div>
+
+        <!-- Pie con buenas prácticas y adaptación low‑spec -->
+        <div class="mt-10 grid grid-cols-1 md:grid-cols-2 gap-6 text-[12px] text-slate-600 border-t border-slate-200 pt-6">
+            <div class="bg-white p-4 rounded-xl shadow-sm">
+                <h3 class="font-bold text-devops-700 mb-2"><i class="bi bi-shield-check"></i> Buenas prácticas (resumen)</h3>
+                <ul class="list-disc list-inside space-y-1">
+                    <li><strong>Idempotencia:</strong> Terraform y estados Salt seguros de repetir.</li>
+                    <li><strong>Alert fatigue:</strong> usar <code>for: 5m</code> en Prometheus.</li>
+                    <li><strong>Mínimo privilegio:</strong> contenedores como <code>user = "odoo"</code> (no root).</li>
+                    <li><strong>Volúmenes externos:</strong> PostgreSQL, Prometheus, Grafana, Loki.</li>
+                    <li><strong>Backups:</strong> de volúmenes (<code>docker run --rm -v ...</code>).</li>
+                </ul>
+            </div>
+            <div class="bg-white p-4 rounded-xl shadow-sm">
+                <h3 class="font-bold text-devops-700 mb-2"><i class="bi bi-battery-half"></i> Versión «Bajos recursos»</h3>
+                <ul class="list-disc list-inside space-y-1">
+                    <li>Un solo Odoo + PostgreSQL (elimina .58 y .60).</li>
+                    <li>Sin Loki ni Alloy → logs solo con <code>docker logs</code>.</li>
+                    <li>Memoria Odoo: 1024 MB (en lugar de 1536).</li>
+                    <li>Opcional: eliminar cAdvisor o reducir memoria de Prometheus.</li>
+                    <li>Consumo total ≈ 3–4 GB RAM.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Footer con credenciales y recursos -->
+        <div class="mt-6 text-center text-[11px] text-slate-400 pt-4 border-t border-slate-200">
+            <i class="bi bi-box-arrow-in-right"></i> Grafana: <span class="font-mono">http://172.28.0.56:3000</span> (admin/admin) &nbsp;|&nbsp;
+            <i class="bi bi-database-fill-add"></i> Crear BD demo: <span class="font-mono">bash scripts-laboratorio/03-init-odoo-db.sh</span> &nbsp;|&nbsp;
+            <i class="bi bi-chat-text-fill"></i> Logs: <span class="font-mono">{service="odoo-minion-1"}</span> en Loki
+        </div>
+    </div>
+
+    <script>
+        const { createApp } = Vue
+        createApp({
+            data() {
+                return {
+                    tools: [
+                        { name: "Terraform", icon: "bi bi-cloud-arrow-up-fill", desc: "IaC declarativa (HCL). Asigna IPs fijas, volúmenes, sube archivos (upload)." },
+                        { name: "Docker", icon: "bi bi-box-fill", desc: "Contenedores Odoo 17 + PostgreSQL. Imágenes inmutables, volúmenes externos." },
+                        { name: "SaltStack", icon: "bi bi-layers-fill", desc: "Master-Minion ZeroMQ. Zero Trust: aceptación de llaves RSA (salt-key -A)." },
+                        { name: "Prometheus", icon: "bi bi-activity", desc: "TSDB modelo Pull. Raspa métricas cada 15‑20s desde exporters." },
+                        { name: "Grafana", icon: "bi bi-graph-up", desc: "Dashboards de métricas (Prometheus) y logs (Loki)." },
+                        { name: "Loki + Alloy", icon: "bi bi-journal-bookmark-fill", desc: "Logs centralizados. Alloy lee stdout de contenedores vía socket Docker; Loki almacena solo etiquetas." }
+                    ],
+                    metrics: [
+                        { name: "Disponibilidad web", expr: "probe_success{instance='http://172.28.0.57:8069'}", desc: "1 = OK, 0 = caído. Alerta si =0 durante 1m." },
+                        { name: "Usuarios Odoo", expr: "odoo_users_total", desc: "Número de usuarios registrados (métrica de negocio)." },
+                        { name: "Latencia BD", expr: "odoo_query_duration_seconds", desc: "Tiempo de consultas SQL. >0.5s → degradación." },
+                        { name: "Memoria real (Odoo)", expr: "container_memory_working_set_bytes{name='odoo-minion-1'}", desc: "Memoria activa (excluye cachés)." },
+                        { name: "CPU contenedor", expr: "rate(container_cpu_usage_seconds_total{name='odoo-minion-1'}[5m]) * 100", desc: "Uso CPU en porcentaje." }
+                    ],
+                    commands: [
+                        { cmd: "terraform init && apply -auto-approve", desc: "Despliega/actualiza toda la infraestructura (11 o 7 contenedores)." },
+                        { cmd: "docker exec -it odoo-minion-1 bash", desc: "Accede al contenedor Odoo (root)." },
+                        { cmd: "salt-key -A -y", desc: "Acepta todas las llaves RSA de los Minions (confianza cero)." },
+                        { cmd: "salt '*' test.ping", desc: "Verifica que todos los Minions responden por ZeroMQ." },
+                        { cmd: "curl http://172.28.0.57:9090/metrics | grep odoo_users", desc: "Comprueba métricas de negocio del exporter." },
+                        { cmd: "docker logs -f odoo-minion-1", desc: "Logs del contenedor Odoo (si no hay Loki)." },
+                        { cmd: "docker inspect odoo-alloy | grep -A5 Mounts", desc: "Verifica que Alloy tiene montado /var/run/docker.sock." }
+                    ],
+                    pipeline: [
+                        { title: "1. Red", cmd: "docker network create LabCEFIRE --subnet=172.28.0.0/24" },
+                        { title: "2. Terraform", cmd: "terraform init && apply (IPs fijas, volúmenes, upload scripts)" },
+                        { title: "3. Base de datos", cmd: "bash 03-init-odoo-db.sh (demo data mediante JSON‑RPC)" },
+                        { title: "4. Salt Master", cmd: "docker exec ud05-salt-master salt-master -d" },
+                        { title: "5. Aceptar llaves", cmd: "salt-key -A -y" },
+                        { title: "6. Verificar", cmd: "bash 03-check-status-odoo.sh (auditoría completa)" },
+                        { title: "7. Dashboards", cmd: "http://172.28.0.56:3000 (Grafana) + Explore (Loki)" }
+                    ],
+                    exporters: [
+                        { name: "Node Exporter", port: "9100", desc: "Métricas del SO anfitrión (CPU, RAM, disco)." },
+                        { name: "cAdvisor", port: "8080", desc: "Métricas por contenedor (working_set_bytes, CPU, red)." },
+                        { name: "Blackbox Exporter", port: "9115", desc: "Sondeos HTTP/ICMP desde fuera (disponibilidad)." },
+                        { name: "Odoo Exporter", port: "9090", desc: "Métricas de negocio (usuarios, ventas, latencia SQL)." },
+                        { name: "Alloy", port: "12345", desc: "Recolector de logs desde socket Docker → Loki." }
+                    ]
+                }
+            }
+        }).mount("#app")
+    </script>
+</body>
+</html>

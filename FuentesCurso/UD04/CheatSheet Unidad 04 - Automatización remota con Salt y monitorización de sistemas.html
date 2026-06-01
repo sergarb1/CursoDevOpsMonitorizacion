@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>CheatSheet · DevOps Core · Terraform, Salt & Prometheus</title>
+
+<!-- Fonts & Icons -->
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+
+<!-- Libraries -->
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script src="https://cdn.tailwindcss.com"></script>
+
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: {
+        sans: ['Plus Jakarta Sans', 'sans-serif'],
+        mono: ['JetBrains Mono', 'monospace'],
+      },
+      colors: {
+        vagrant: {
+          50: '#f0f4ff',
+          100: '#e0e9fe',
+          200: '#c1d3fe',
+          300: '#91b1fd',
+          400: '#5a87fa',
+          500: '#355df5',
+          600: '#233ee9',
+          700: '#1c2fd5',
+          800: '#1d29ad',
+          900: '#1d2889',
+          950: '#161a53',
+        },
+      }
+    }
+  }
+}
+</script>
+
+<style type="text/tailwindcss">
+@layer base {
+  body {
+    @apply bg-slate-50 text-slate-900 antialiased selection:bg-vagrant-100 selection:text-vagrant-900;
+  }
+}
+
+@layer components {
+  .section-card {
+    @apply bg-white rounded-2xl p-6 shadow-sm border border-slate-200 hover:shadow-md transition-shadow duration-300;
+  }
+  .code-inline {
+    @apply font-mono text-sm bg-slate-100 text-vagrant-700 px-1.5 py-0.5 rounded-md border border-slate-200;
+  }
+  .btn-badge {
+    @apply px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider inline-flex items-center;
+  }
+}
+
+pre {
+  @apply font-mono text-sm bg-slate-900 text-slate-100 p-4 rounded-xl overflow-x-auto border border-slate-800 my-4 shadow-inner;
+}
+
+.gradient-bg {
+  background: radial-gradient(circle at top right, rgba(53, 93, 245, 0.05), transparent),
+              radial-gradient(circle at bottom left, rgba(53, 93, 245, 0.05), transparent);
+}
+
+@media print {
+  @page { margin: 1cm; }
+  .no-print { display: none !important; }
+  
+  body { 
+    background: white !important; 
+    min-height: 0 !important; 
+    padding: 0 !important; 
+    margin: 0 !important;
+    color: black !important;
+  }
+  
+  #app { 
+    max-width: none !important; 
+    padding: 0 !important; 
+    margin: 0 !important;
+    display: block !important; 
+  }
+
+  header { 
+    @apply border-b border-slate-200 mb-4 pb-4 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    justify-content: space-between !important;
+    align-items: flex-end !important;
+    break-inside: avoid !important;
+  }
+
+  .grid { 
+    display: block !important; 
+  }
+
+  .section-card { 
+    @apply mb-4 p-4 border border-slate-200 rounded-lg !important;
+    break-inside: avoid !important;
+    page-break-inside: avoid !important;
+    box-shadow: none !important;
+  }
+
+  .lg\:col-span-2, .space-y-6 { 
+    width: 100% !important; 
+    margin: 0 !important;
+  }
+
+  h1 { font-size: 24pt !important; }
+  h2 { font-size: 16pt !important; }
+  p, td, li { font-size: 10pt !important; }
+  pre { 
+    font-size: 8pt !important; 
+    white-space: pre-wrap !important;
+    @apply p-2 my-2 bg-slate-50 text-slate-900 border border-slate-200 !important;
+  }
+  
+  .gradient-bg { background: none !important; }
+}
+</style>
+</head>
+
+<body class="gradient-bg min-h-screen pb-12">
+<div id="app" class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 pt-8">
+
+  <!-- Header -->
+  <header class="mb-10 text-center sm:text-left flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-slate-200 pb-8">
+    <div>
+      <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-vagrant-100 text-vagrant-700 text-xs font-bold mb-4 uppercase tracking-widest">
+        <i class="bi bi-cpu-fill"></i> Infraestructura Híbrida y Observabilidad
+      </div>
+      <h1 class="text-4xl font-extrabold tracking-tight text-slate-900 flex items-center gap-3 justify-center sm:justify-start">
+        <span class="bg-vagrant-500 text-white p-2 rounded-xl shadow-lg shadow-vagrant-200">
+          <i class="bi bi-box-seam-fill"></i>
+        </span>
+        DevOps Core CheatSheet
+      </h1>
+      <p class="mt-2 text-lg text-slate-500 font-medium">
+        Terraform, Docker, SaltStack, Prometheus & Grafana
+      </p>
+    </div>
+    <div class="hidden sm:block text-right">
+      <p class="text-xs text-slate-400 font-bold uppercase tracking-widest">Gestión a Escala</p>
+      <p class="text-sm font-semibold text-slate-600">Automatización y Telemetría</p>
+    </div>
+  </header>
+
+  <!-- Dashboard Grid -->
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+    <!-- Left Column: Commands, Logic & Core Explanations -->
+    <div class="lg:col-span-2 space-y-6">
+      
+      <!-- Fundamentos Core (NEW SECTION) -->
+      <section class="section-card border-l-4 border-l-vagrant-500">
+        <h2 class="text-xl font-bold flex items-center gap-2 mb-6 border-b border-slate-100 pb-4">
+          <i class="bi bi-book-half text-vagrant-500"></i>
+          1. Conceptos y Herramientas Fundamentales
+        </h2>
+        <div class="space-y-6">
+          <div v-for="tool in tools" :key="tool.name" class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+            <h3 class="font-bold text-vagrant-700 text-md mb-2 flex items-center gap-2">
+              <i :class="tool.icon"></i> {{ tool.name }}
+            </h3>
+            <p class="text-sm text-slate-600 leading-relaxed text-justify">
+              <strong class="text-slate-800">{{ tool.highlight }}</strong> {{ tool.desc }}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- PromQL Intelligence -->
+      <section class="section-card">
+        <h3 class="text-xl font-bold flex items-center gap-2 mb-4">
+          <i class="bi bi-graph-up-arrow text-vagrant-500"></i> 2. Inteligencia PromQL y Alertas
+        </h3>
+        <p class="text-sm text-slate-600 mb-6">Prometheus no usa bases de datos relacionales (SQL). Evalúa Time-Series (series temporales basadas en etiquetas) mediante álgebra sobre <strong>Vectores Instantáneos</strong> (el milisegundo actual) y <strong>Vectores de Rango</strong> (histórico).</p>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Alerta 1 -->
+          <div class="p-4 bg-slate-900 rounded-xl shadow-inner border border-slate-800">
+            <span class="text-xs text-slate-400 font-bold block mb-2 uppercase tracking-wider">A. Regex & Endpoint Health</span>
+            <code class="text-xs text-emerald-400 block whitespace-pre-wrap break-all mb-3 font-semibold">up{job=~".*-node"} == 0</code>
+            <p class="text-xs text-slate-300 leading-relaxed border-t border-slate-700 pt-2">
+              <span class="text-white font-medium">Lógica:</span> La métrica <code>up</code> es generada internamente por Prometheus (1=Pull OK, 0=Timeout). Usamos la expresión regular <code>=~".*-node"</code> para vigilar dinámicamente cualquier contenedor o máquina que caiga, sin necesidad de harcodear IPs.
+            </p>
+          </div>
+
+          <!-- Alerta 2 -->
+          <div class="p-4 bg-slate-900 rounded-xl shadow-inner border border-slate-800">
+            <span class="text-xs text-slate-400 font-bold block mb-2 uppercase tracking-wider">B. Álgebra Vectorial (RAM)</span>
+            <code class="text-xs text-amber-400 block whitespace-pre-wrap break-all mb-3 font-semibold">(1 - (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes)) * 100 > 95</code>
+            <p class="text-xs text-slate-300 leading-relaxed border-t border-slate-700 pt-2">
+              <span class="text-white font-medium">Lógica:</span> Los agentes envían bytes crudos. PromQL evalúa algebraicamente dos series temporales distintas, realizando cálculos matemáticos al vuelo para disparar la alerta cuando el clúster cruza el 95% de uso real de RAM.
+            </p>
+          </div>
+
+          <!-- Alerta 3 -->
+          <div class="p-4 bg-slate-900 rounded-xl shadow-inner border border-slate-800">
+            <span class="text-xs text-slate-400 font-bold block mb-2 uppercase tracking-wider">C. Regresión Predictiva</span>
+            <code class="text-xs text-sky-400 block whitespace-pre-wrap break-all mb-3 font-semibold">predict_linear(node_filesystem_free_bytes{mountpoint="/"}[6h], 24*3600) &lt; 0</code>
+            <p class="text-xs text-slate-300 leading-relaxed border-t border-slate-700 pt-2">
+              <span class="text-white font-medium">Lógica:</span> Convierte la consulta en un Vector de Rango <code>[6h]</code>. Analiza la velocidad exacta a la que se llena el disco duro en las últimas 6 horas y aplica matemáticas predictivas para alertar si nos quedaremos sin espacio en las próximas 24 horas.
+            </p>
+          </div>
+
+          <!-- Alerta 4 -->
+          <div class="p-4 bg-slate-900 rounded-xl shadow-inner border border-slate-800">
+            <span class="text-xs text-slate-400 font-bold block mb-2 uppercase tracking-wider">D. Ventanas de Contadores</span>
+            <code class="text-xs text-rose-400 block whitespace-pre-wrap break-all mb-3 font-semibold">increase(node_vmstat_oom_kill[5m]) > 0</code>
+            <p class="text-xs text-slate-300 leading-relaxed border-t border-slate-700 pt-2">
+              <span class="text-white font-medium">Lógica:</span> Los contadores (Counters) siempre crecen. Si el Kernel aniquila un proceso por falta de RAM, el contador sube. <code>increase()</code> evalúa solo los eventos nuevos detectados en la ventana móvil de los últimos 5 minutos.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- CLI Commands -->
+      <section class="section-card">
+        <h2 class="text-xl font-bold flex items-center gap-2 mb-6 border-b border-slate-100 pb-4">
+          <i class="bi bi-terminal-fill text-vagrant-500"></i>
+          3. Operaciones Core (CLI)
+        </h2>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm text-left">
+            <thead class="text-xs text-slate-500 uppercase font-bold bg-slate-50/50">
+              <tr>
+                <th class="px-4 py-3 rounded-l-lg italic">Comando Shell</th>
+                <th class="px-4 py-3">Arquitectura / Bajo el Capó</th>
+                <th class="px-4 py-3 rounded-r-lg">Contexto</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr v-for="cmd in commands" :key="cmd.name" class="hover:bg-slate-50/50 transition-colors">
+                <td class="px-4 py-3 font-mono font-medium text-vagrant-600 text-xs whitespace-nowrap">{{ cmd.name }}</td>
+                <td class="px-4 py-3 text-slate-600 text-xs">{{ cmd.use }}</td>
+                <td class="px-4 py-3">
+                  <span :class="riskClass(cmd.risk)" class="btn-badge">
+                    <i :class="riskIcon(cmd.risk)" class="mr-1"></i>
+                    {{ cmd.risk }}
+                  </span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- Right Column: Config & Flow -->
+    <div class="space-y-6">
+      
+      <!-- Flow Card -->
+      <section class="section-card bg-vagrant-950 text-white border-none shadow-xl shadow-vagrant-200">
+        <h2 class="text-xl font-bold flex items-center gap-2 mb-6 border-b border-white/10 pb-4">
+          <i class="bi bi-hdd-stack text-vagrant-400"></i>
+          Pipeline DevOps
+        </h2>
+        <div class="relative pl-8 space-y-6 before:absolute before:left-[11px] before:top-2 before:bottom-2 before:w-0.5 before:bg-white/10">
+          <div v-for="(step, i) in flow" :key="i" class="relative">
+            <span class="absolute -left-[28px] top-1 w-5 h-5 rounded-full bg-vagrant-500 border-4 border-vagrant-950 text-[10px] flex items-center justify-center font-bold">
+              {{ i + 1 }}
+            </span>
+            <div class="font-bold text-sm">{{ step.title }}</div>
+            <code class="text-[10px] text-vagrant-300">{{ step.cmd }}</code>
+          </div>
+        </div>
+      </section>
+
+      <!-- Terraform Example -->
+      <section class="section-card">
+        <div class="flex items-center justify-between mb-4">
+          <h2 class="text-lg font-bold flex items-center gap-2">
+            <i class="bi bi-file-code-fill text-vagrant-500"></i>
+            IaC: terraform.tf
+          </h2>
+          <span class="text-[10px] font-bold text-slate-400 bg-slate-100 px-2 py-0.5 rounded uppercase">HCL</span>
+        </div>
+<pre class="!m-0 text-[10px] leading-relaxed"><span class="text-blue-400 italic"># Definición declarativa del Contenedor Master</span>
+resource <span class="text-amber-400">"docker_container"</span> <span class="text-emerald-400">"vm_master"</span> {
+  name     = <span class="text-amber-400">"vm-master"</span>
+  image    = <span class="text-amber-400">"ubuntu:24.04"</span>
+  
+  <span class="text-blue-400 italic"># IP Estática Inamovible (.40)</span>
+  networks_advanced {
+    name         = docker_network.internal_net.name
+    ipv4_address = <span class="text-amber-400">"172.28.0.40"</span>
+  }
+
+  <span class="text-blue-400 italic"># Volúmenes (Persistencia de BD Temporal)</span>
+  volumes {
+    volume_name    = docker_volume.prometheus_data.name
+    container_path = <span class="text-amber-400">"/var/lib/prometheus"</span>
+  }
+
+  <span class="text-blue-400 italic"># Inyección de configuración (Upload al vuelo)</span>
+  upload {
+    source = <span class="text-amber-400">"${path.cwd}/../monitoring/prometheus.yml"</span>
+    file   = <span class="text-amber-400">"/etc/prometheus/prometheus.yml"</span>
+  }
+}</pre>
+      </section>
+
+      <!-- Exporters (Agentes) -->
+      <section class="section-card bg-slate-50 border-slate-200">
+        <h2 class="text-sm font-bold uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2">
+          <i class="bi bi-diagram-3-fill"></i> Exporters (Endpoints)
+        </h2>
+        <div class="space-y-4">
+          <div v-for="box in boxes" :key="box.name" class="flex flex-col gap-1 p-2 bg-white rounded border border-slate-100">
+            <code class="text-[11px] font-bold text-vagrant-700">{{ box.name }}</code>
+            <span class="text-xs text-slate-600 leading-tight">{{ box.desc }}</span>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+const { createApp } = Vue
+
+createApp({
+  data(){
+    return {
+      tools: [
+        {
+          name: "Terraform (Infraestructura como Código)",
+          icon: "bi bi-cloud-arrow-up-fill",
+          highlight: "Declarativo e Idempotente:",
+          desc: "Permite definir y aprovisionar el centro de datos a través de código (HCL). En lugar de crear servidores manualmente (imperativo), tú 'declaras' cómo quieres que sea la arquitectura final. Terraform calcula la diferencia entre la realidad y tu código, y aplica los cambios necesarios garantizando que el resultado sea siempre exacto."
+        },
+        {
+          name: "Docker (Contenedorización)",
+          icon: "bi bi-box-fill",
+          highlight: "Aislamiento Ligero:",
+          desc: "A diferencia de las máquinas virtuales tradicionales que emulan hardware y un SO completo, Docker empaqueta el software y sus dependencias en 'contenedores'. Éstos comparten el Kernel del host mediante 'Namespaces' (aislamiento de procesos) y 'Cgroups' (limitación de CPU/RAM), siendo ultrarrápidos y consistentes en cualquier entorno."
+        },
+        {
+          name: "Prometheus & PromQL (Observabilidad)",
+          icon: "bi bi-activity",
+          highlight: "Métricas por Pulling:",
+          desc: "Prometheus es una Base de Datos de Series Temporales (TSDB) diseñada para fiabilidad. En lugar de que los servidores le envíen datos (Push), Prometheus va a buscarlos activamente (Pull). Utiliza PromQL, un lenguaje matemático avanzado que permite diseccionar telemetría masiva en tiempo real para generar alertas."
+        },
+        {
+          name: "SaltStack (Gestión de Configuración)",
+          icon: "bi bi-layers-fill",
+          highlight: "Arquitectura Master/Minion:",
+          desc: "Herramienta de ejecución remota extrema basada en un bus de eventos cifrado (ZeroMQ). Permite aplicar configuraciones estandarizadas a miles de nodos simultáneamente. Garantiza una arquitectura 'Zero Trust' donde los minions deben ser criptográficamente aceptados en el Master antes de recibir cualquier orden."
+        }
+      ],
+      commands: [
+        {name: "terraform apply", use: "Traduce el código declarativo (.tf) en llamadas a las APIs (AWS, Docker) para crear los recursos de infraestructura.", risk: "Alto"},
+        {name: "docker exec -it <vm>", use: "Accede directamente al socket interactivo (bash) del contenedor sin requerir instalar un demonio SSH.", risk: "Bajo"},
+        {name: "salt-key -A -y", use: "Valida las claves PKI pendientes en el Master, cerrando el anillo de confianza Zero Trust con los Minions.", risk: "Medio"},
+        {name: "salt '*' test.ping", use: "Verifica la latencia del bus ZeroMQ exigiendo respuesta en tiempo real a todos los agentes conectados.", risk: "Nulo"},
+        {name: "kill -HUP <pid>", use: "Señal de SO que fuerza a Prometheus a recargar su archivo YAML en memoria sin tirar la base de datos.", risk: "Medio"}
+      ],
+      flow: [
+        {title: "1. Red Híbrida L2", cmd: "ip link add name Lab type bridge"},
+        {title: "2. IaC (Terraform)", cmd: "terraform init && terraform apply"},
+        {title: "3. Control (SaltStack)", cmd: "salt-key -A && salt '*' state.apply"},
+        {title: "4. TSDB (Prometheus)", cmd: "systemctl start prometheus"},
+        {title: "5. Visualización (Grafana)", cmd: "curl -X POST .../api/dashboards"}
+      ],
+      boxes: [
+        {name: "Node Exporter (TCP 9100)", desc: "Micro-agente pasivo de Prometheus que lee del Kernel Linux (/proc, /sys) para exponer métricas de SO (CPU, RAM, red)."},
+        {name: "cAdvisor (TCP 8080)", desc: "Monitor de Google montado en docker.sock. Extrae telemetría individual contenedor por contenedor."},
+        {name: "Blackbox Exporter", desc: "Auditor sintético. Simula a un usuario final lanzando Pings y peticiones HTTP/S para validar caídas reales."},
+        {name: "Grafana Server (TCP 3000)", desc: "Capa de visualización pura. Ejecuta las consultas PromQL complejas y las convierte en gráficas operativas."}
+      ]
+    }
+  },
+  methods: {
+    riskClass(level) {
+      const classes = {
+        'Nulo': 'bg-emerald-100 text-emerald-700',
+        'Bajo': 'bg-blue-100 text-blue-700',
+        'Medio': 'bg-amber-100 text-amber-700',
+        'Alto': 'bg-rose-100 text-rose-700'
+      }
+      return classes[level] || 'bg-slate-100 text-slate-700'
+    },
+    riskIcon(level) {
+      const icons = {
+        'Nulo': 'bi bi-check-circle-fill',
+        'Bajo': 'bi bi-info-circle-fill',
+        'Medio': 'bi bi-exclamation-circle-fill',
+        'Alto': 'bi bi-exclamation-triangle-fill'
+      }
+      return icons[level] || 'bi bi-question-circle-fill'
+    }
+  }
+}).mount("#app")
+</script>
+
+</body>
+</html>
